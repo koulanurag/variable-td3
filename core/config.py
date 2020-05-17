@@ -15,6 +15,8 @@ class BaseConfig(object):
                  tau: float = 0.005,
                  gamma: float = 0.99,
                  alpha: float = 0.2,
+                 max_epsilon: float = 1,
+                 min_epsilon: float = 0.1,
                  policy_noise: float = 0.2,
                  noise_clip: float = 0.5,
                  policy_delay: int = 2,
@@ -42,6 +44,10 @@ class BaseConfig(object):
         self.noise_clip = noise_clip
         self.policy_delay = policy_delay
         self.test_episodes = test_episodes
+
+        # exploration
+        self.min_epsilon = min_epsilon
+        self.max_epsilon = max_epsilon
 
         # test
         self.test_interval = 10

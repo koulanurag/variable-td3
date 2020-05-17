@@ -3,6 +3,11 @@ import os
 import shutil
 
 
+def get_epsilon(max_eps, min_eps, curr_steps, max_steps):
+    epsilon = max(min_eps, max_eps - (max_eps - min_eps) * curr_steps / (0.6 * max_steps))
+    return epsilon
+
+
 def make_results_dir(exp_path, args):
     os.makedirs(exp_path, exist_ok=True)
     if args.opr == 'train' and os.path.exists(exp_path) and os.listdir(exp_path):

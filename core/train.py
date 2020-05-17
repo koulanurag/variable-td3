@@ -1,14 +1,18 @@
+import itertools
+import logging
+import random
+
+import numpy as np
+import torch
+from torch.distributions import Normal
+from torch.nn import MSELoss
+from torch.optim import Adam
+from torch.utils.tensorboard import SummaryWriter
+
+from core.utils import get_epsilon
 from .config import BaseConfig
 from .replay_memory import ReplayMemory
-from torch.utils.tensorboard import SummaryWriter
-import itertools
 from .test import test
-import torch
-from torch.nn import MSELoss
-from torch.distributions import Normal, Categorical
-from torch.optim import Adam
-import logging
-import numpy as np
 
 train_logger = logging.getLogger('train')
 test_logger = logging.getLogger('train_eval')
@@ -100,6 +104,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
 
         done = False
         episode_steps, episode_reward = 0, 0
+        epsilon = get_epsilon(config.max_epsilon, config.min_epsilon, total_env_steps, config.max_env_steps)
         state = env.reset()
 
         while not done:
@@ -110,10 +115,12 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 action = action + noise.sample(action.shape).squeeze(-1)
                 action = config.clip_action(action)
 
+                # epsilon-greedy repeat
                 repeat_q = model.critic_1(torch.FloatTensor(state).unsqueeze(0), action)
-                repeat_idx = repeat_q.argmax(1).item()
-                repeat_one_hot = np.zeros(repeat_q.shape[1])
-                repeat_one_hot[repeat_idx] = 1
+                if np.random.rand() <= epsilon:
+                    repeat_idx = random.randrange(len(model.action_repeats))
+                else:
+                    repeat_idx = repeat_q.argmax(1).item()
 
             # step
             action = action.data.cpu().numpy()[0]
@@ -142,7 +149,8 @@ def train(config: BaseConfig, writer: SummaryWriter):
         writer.add_scalar('data/eps_reward', episode_reward, updates)
         writer.add_scalar('data/eps_steps', episode_steps, updates)
         writer.add_scalar('data/episodes', i_episode, updates)
-        train_logger.info('#{} test score:{} eps steps: {}'.format(i_episode, episode_reward, episode_steps))
+        writer.add_scalar('data/epsilon', epsilon, updates)
+        train_logger.info('#{} train score:{} eps steps: {}'.format(i_episode, episode_reward, episode_steps))
 
         for name, W in model.named_parameters():
             writer.add_histogram('network_weights' + '/' + name, W.data.cpu().numpy(), updates)
