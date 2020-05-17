@@ -1,0 +1,47 @@
+import pickle
+
+import numpy as np
+import torch
+
+
+def _test(env, model, render):
+    episode_reward = 0
+    action_repeats = []
+
+    state = env.reset()
+    done = False
+
+    while not done:
+        if render:
+            env.render()
+
+        # get action
+        state = torch.FloatTensor(state).unsqueeze(0)
+        action = model.actor(state)
+        repeat_q = model.critic_1(state, action)
+        repeat_idx = repeat_q.argmax(1).item()
+
+        action = action.data.cpu().numpy()[0]
+        repeat = model.action_repeats[repeat_idx]
+
+        # step
+        state, reward, done, info = env.step(action, repeat)  # Step
+        episode_reward += reward
+        action_repeats.append(repeat)
+
+    return episode_reward, action_repeats
+
+
+def test(env, model, episodes: int, device='cpu', render: bool = False, save_test_data: bool = False, save_path=None):
+    model.to(device)
+    model.eval()
+
+    test_data = []
+    for ep_i in range(episodes):
+        test_data.append(_test(env, model, render))
+
+    test_score, repeat_counts = zip(*test_data)
+
+    if save_test_data:
+        pickle.dump((test_score, repeat_counts), open(save_path, 'wb'))
+    return np.array(test_score).mean(), np.mean([np.mean(x) for x in repeat_counts])

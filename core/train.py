@@ -1,0 +1,172 @@
+from .config import BaseConfig
+from .replay_memory import ReplayMemory
+from torch.utils.tensorboard import SummaryWriter
+import itertools
+from .test import test
+import torch
+from torch.nn import MSELoss
+from torch.distributions import Normal, Categorical
+from torch.optim import Adam
+import logging
+import numpy as np
+
+train_logger = logging.getLogger('train')
+test_logger = logging.getLogger('train_eval')
+
+
+def soft_update(target, source, tau):
+    for target_param, param in zip(target.parameters(), source.parameters()):
+        target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
+
+
+def update_params(model, target_model, critic_optimizer, policy_optimizer, memory, updates, config, writer):
+    # Sample a batch from memory
+    batch = memory.sample(batch_size=config.batch_size)
+
+    # pre-process batch
+    state_batch = torch.FloatTensor(batch.state).to(config.device)
+    next_state_batch = torch.FloatTensor(batch.next_state).to(config.device)
+    action_batch = torch.FloatTensor(batch.action).to(config.device)
+    action_repeat_batch = torch.FloatTensor(batch.action_repeat).to(config.device).long().unsqueeze(1)
+    reward_batch = torch.FloatTensor(batch.reward).to(config.device).unsqueeze(1)
+    mask_batch = torch.FloatTensor(batch.mask).to(config.device).unsqueeze(1)
+
+    # Compute Targets for Q values
+    with torch.no_grad():
+        # Select next action according to target policy:
+        next_action = target_model.actor(next_state_batch)
+        noise_dist = Normal(torch.tensor([0.0]), torch.tensor([config.policy_noise]))
+        noise = noise_dist.sample(next_action.shape).squeeze(-1)
+        noise = noise.clamp(-config.noise_clip, config.noise_clip)
+        next_action = next_action + noise
+        next_action = config.clip_action(next_action)
+
+        q1_next_target = target_model.critic_1(next_state_batch, next_action)
+        q2_next_target = target_model.critic_2(next_state_batch, next_action)
+        min_q_next_target = torch.min(q1_next_target, q2_next_target)
+        max_q_repeat_target = min_q_next_target.max(dim=1)[0].unsqueeze(1)
+        next_q_value = reward_batch + (mask_batch * config.gamma * max_q_repeat_target)
+
+    # Compute Loss for  Q_values
+    q1 = model.critic_1(state_batch, action_batch)
+    q2 = model.critic_2(state_batch, action_batch)
+
+    q1_loss = MSELoss()(q1.gather(1, action_repeat_batch), next_q_value)
+    q2_loss = MSELoss()(q2.gather(1, action_repeat_batch), next_q_value)
+
+    # Update critic network
+    critic_optimizer.zero_grad()
+    (q1_loss + q2_loss).backward()
+    critic_optimizer.step()
+
+    # Compute Loss for Policy
+    action = model.actor(state_batch)
+    q1 = model.critic_1(state_batch, action)
+    policy_loss = -q1.max(1)[0].mean()
+
+    # Update policy network
+    if updates % config.policy_delay == 0:
+        policy_optimizer.zero_grad()
+        policy_loss.backward()
+        policy_optimizer.step()
+
+    # Update target network
+    soft_update(target_model, model, config.tau)
+
+    # Log
+    writer.add_scalar('train/critic_1_loss', q1_loss.item(), updates)
+    writer.add_scalar('train/critic_2_loss', q2_loss.item(), updates)
+    writer.add_scalar('train/policy_loss', policy_loss.item(), updates)
+
+
+def train(config: BaseConfig, writer: SummaryWriter):
+    memory = ReplayMemory(config.replay_memory_capacity)
+
+    # create networks & optimizer
+    model = config.get_uniform_network().to(config.device)
+    target_model = config.get_uniform_network().to(config.device)
+    target_model.load_state_dict(model.state_dict())
+    test_model = config.get_uniform_network().to(config.device)
+
+    critic_optimizer = Adam([{'params': model.critic_1.parameters()},
+                             {'params': model.critic_2.parameters()}], lr=config.lr)
+    policy_optimizer = Adam(model.actor.parameters(), lr=config.lr)
+
+    total_env_steps = 0
+    updates = 0
+    best_test_score = float('-inf')
+    env = config.new_game()
+    for i_episode in itertools.count(1):
+
+        done = False
+        episode_steps, episode_reward = 0, 0
+        state = env.reset()
+
+        while not done:
+            with torch.no_grad():
+                # noisy action
+                action = model.actor(torch.FloatTensor(state).unsqueeze(0))
+                noise = Normal(torch.tensor([0.0]), torch.tensor([config.exploration_noise]))
+                action = action + noise.sample(action.shape).squeeze(-1)
+                action = config.clip_action(action)
+
+                repeat_q = model.critic_1(torch.FloatTensor(state).unsqueeze(0), action)
+                repeat_idx = repeat_q.argmax(1).item()
+                repeat_one_hot = np.zeros(repeat_q.shape[1])
+                repeat_one_hot[repeat_idx] = 1
+
+            # step
+            action = action.data.cpu().numpy()[0]
+            repeat = model.action_repeats[repeat_idx]
+            next_state, reward, done, info = env.step(action, repeat)
+
+            # Ignore the "done" signal if it comes from hitting the time horizon.
+            mask = 1 if (('TimeLimit.truncated' in info) and info['TimeLimit.truncated']) else float(not done)
+
+            # Add to memory
+            memory.push(state, action, repeat_idx, reward, next_state, mask)
+
+            episode_steps += repeat
+            total_env_steps += repeat
+            episode_reward += reward
+            state = next_state
+
+            # update network
+            if len(memory) > config.batch_size:
+                for i in range(config.updates_per_step * repeat):
+                    update_params(model, target_model, critic_optimizer, policy_optimizer, memory, updates,
+                                  config, writer)
+                    updates += 1
+
+        # log episode data
+        writer.add_scalar('data/eps_reward', episode_reward, updates)
+        writer.add_scalar('data/eps_steps', episode_steps, updates)
+        writer.add_scalar('data/episodes', i_episode, updates)
+        train_logger.info('#{} test score:{} eps steps: {}'.format(i_episode, episode_reward, episode_steps))
+
+        for name, W in model.named_parameters():
+            writer.add_histogram('network_weights' + '/' + name, W.data.cpu().numpy(), updates)
+
+        # Test
+        if i_episode % config.test_interval == 0:
+            test_model.load_state_dict(model.state_dict())
+            test_score, avg_action_repeats = test(env, test_model, config.test_episodes)
+            if test_score > best_test_score:
+                torch.save(test_model.state_dict(), config.best_model_path)
+
+            # Test Log
+            writer.add_scalar('test/score', test_score, updates)
+            writer.add_scalar('test/avg_action_repeats', avg_action_repeats, updates)
+            test_logger.info('#{} test score: {} avg_action_repeats:{}'.format(i_episode, test_score,
+                                                                               avg_action_repeats))
+        # save model
+        if i_episode % config.save_model_freq == 0:
+            torch.save(model.state_dict(), config.model_path)
+
+        # check if max. env steps reached.
+        if total_env_steps > config.max_env_steps:
+            train_logger.info('max env. steps reached!!')
+            break
+
+    # save the last updated model
+    torch.save(model.state_dict(), config.model_path)
