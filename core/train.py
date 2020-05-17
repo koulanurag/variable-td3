@@ -152,9 +152,6 @@ def train(config: BaseConfig, writer: SummaryWriter):
         writer.add_scalar('data/epsilon', epsilon, updates)
         train_logger.info('#{} train score:{} eps steps: {}'.format(i_episode, episode_reward, episode_steps))
 
-        for name, W in model.named_parameters():
-            writer.add_histogram('network_weights' + '/' + name, W.data.cpu().numpy(), updates)
-
         # Test
         if i_episode % config.test_interval == 0:
             test_model.load_state_dict(model.state_dict())
