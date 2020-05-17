@@ -77,10 +77,7 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
     # Update target network
     soft_update(target_model, model, config.tau)
 
-    # Log
-    writer.add_scalar('train/critic_1_loss', q1_loss.item(), updates)
-    writer.add_scalar('train/critic_2_loss', q2_loss.item(), updates)
-    writer.add_scalar('train/policy_loss', policy_loss.item(), updates)
+    return q1_loss.item(), q2_loss.item(), policy_loss.item()
 
 
 def train(config: BaseConfig, writer: SummaryWriter):
@@ -140,17 +137,35 @@ def train(config: BaseConfig, writer: SummaryWriter):
 
             # update network
             if len(memory) > config.batch_size:
+                critic_1_loss, critic_2_loss, policy_loss = 0, 0, 0
                 for i in range(config.updates_per_step * repeat):
-                    update_params(model, target_model, critic_optimizer, policy_optimizer, memory, updates,
-                                  config, writer)
+                    loss_data = update_params(model, target_model, critic_optimizer,
+                                              policy_optimizer, memory, updates, config, writer)
+                    critic_1_loss += loss_data[0]
+                    critic_2_loss += loss_data[1]
+                    policy_loss += loss_data[2]
+
                     updates += 1
 
+                critic_1_loss /= (config.updates_per_step * repeat)
+                critic_2_loss /= (config.updates_per_step * repeat)
+                policy_loss /= (config.updates_per_step * repeat)
+
+                # Log
+                writer.add_scalar('train/critic_1_loss', critic_1_loss.item(), total_env_steps)
+                writer.add_scalar('train/critic_2_loss', critic_1_loss.item(), total_env_steps)
+                writer.add_scalar('train/policy_loss', policy_loss.item(), total_env_steps)
+
         # log episode data
-        writer.add_scalar('data/eps_reward', episode_reward, updates)
-        writer.add_scalar('data/eps_steps', episode_steps, updates)
-        writer.add_scalar('data/episodes', i_episode, updates)
-        writer.add_scalar('data/epsilon', epsilon, updates)
-        train_logger.info('#{} train score:{} eps steps: {}'.format(i_episode, episode_reward, episode_steps))
+        writer.add_scalar('data/eps_reward', episode_reward, total_env_steps)
+        writer.add_scalar('data/eps_steps', episode_steps, total_env_steps)
+        writer.add_scalar('data/episodes', i_episode, total_env_steps)
+        writer.add_scalar('data/epsilon', epsilon, total_env_steps)
+        writer.add_scalar('data/updates', updates, total_env_steps)
+
+        _msg = '#{} train score:{} eps steps: {} total steps: {} updates : {}'
+        _msg = _msg.format(i_episode, round(episode_reward, 2), episode_steps, total_env_steps, updates)
+        train_logger.info(_msg)
 
         # Test
         if i_episode % config.test_interval == 0:
@@ -160,8 +175,8 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 torch.save(test_model.state_dict(), config.best_model_path)
 
             # Test Log
-            writer.add_scalar('test/score', test_score, updates)
-            writer.add_scalar('test/avg_action_repeats', avg_action_repeats, updates)
+            writer.add_scalar('test/score', test_score, total_env_steps)
+            writer.add_scalar('test/avg_action_repeats', avg_action_repeats, total_env_steps)
             test_logger.info('#{} test score: {} avg_action_repeats:{}'.format(i_episode, test_score,
                                                                                avg_action_repeats))
         # save model
