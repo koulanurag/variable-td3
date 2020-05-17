@@ -24,6 +24,8 @@ class QNetwork(nn.Module):
         self.linear3 = nn.Linear(hidden_dim, num_action_repeats)
 
         self.apply(weights_init_)
+        self.linear3.weight.data.fill_(0)
+        self.linear3.bias.data.fill_(0)
 
     def forward(self, state, action):
         xu = torch.cat([state, action], 1)

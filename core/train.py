@@ -152,9 +152,9 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 policy_loss /= (config.updates_per_step * repeat)
 
                 # Log
-                writer.add_scalar('train/critic_1_loss', critic_1_loss.item(), total_env_steps)
-                writer.add_scalar('train/critic_2_loss', critic_1_loss.item(), total_env_steps)
-                writer.add_scalar('train/policy_loss', policy_loss.item(), total_env_steps)
+                writer.add_scalar('train/critic_1_loss', critic_1_loss, total_env_steps)
+                writer.add_scalar('train/critic_2_loss', critic_1_loss, total_env_steps)
+                writer.add_scalar('train/policy_loss', policy_loss, total_env_steps)
 
         # log episode data
         writer.add_scalar('data/eps_reward', episode_reward, total_env_steps)
