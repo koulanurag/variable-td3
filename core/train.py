@@ -70,6 +70,7 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
 
     # Update policy network
     if updates % config.policy_delay == 0:
+        critic_optimizer.zero_grad()
         policy_optimizer.zero_grad()
         policy_loss.backward()
         policy_optimizer.step()
