@@ -10,10 +10,10 @@ class BaseConfig(object):
 
     def __init__(self,
                  max_env_steps: int = 10e5,
-                 batch_size: int = 256,
+                 batch_size: int = 100,
                  updates_per_step: int = 1,
                  exploration_noise: float = 0.1,
-                 lr: float = 3 * 1e-4,
+                 lr: float = 1e-3,
                  tau: float = 0.005,
                  gamma: float = 0.99,
                  alpha: float = 0.2,
