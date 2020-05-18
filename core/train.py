@@ -97,7 +97,8 @@ def train(config: BaseConfig, writer: SummaryWriter):
     total_env_steps = 0
     updates = 0
     best_test_score = float('-inf')
-    env = config.new_game()
+    env = config.new_game(seed=config.seed)
+
     for i_episode in itertools.count(1):
 
         done = False
