@@ -8,7 +8,7 @@ class Box2DConfig(BaseConfig):
     def __init__(self):
         super(Box2DConfig, self).__init__(max_env_steps=int(2e5),
                                           lr=1e-3,
-                                          replay_memory_capacity=100000,
+                                          replay_memory_capacity=50000,
                                           fixed_action_repeat=1)
 
     def new_game(self, seed=None, save_video=False, save_path=None, video_callable=None, uid=None, eval=False):
