@@ -133,15 +133,15 @@ def train(config: BaseConfig, writer: SummaryWriter):
             state = state.data.cpu().numpy()[0]
             memory.push(state, action, repeat_idx, reward, next_state, mask)
 
-            episode_steps += repeat
-            total_env_steps += repeat
+            episode_steps += info['repeat']
+            total_env_steps += info['repeat']
             episode_reward += reward
             state = next_state
 
             # update network
             if len(memory) > config.batch_size:
                 critic_1_loss, critic_2_loss, policy_loss = 0, 0, 0
-                update_count = config.updates_per_step * repeat
+                update_count = config.updates_per_step * info['repeat']
                 for i in range(update_count):
                     loss = update_params(model, target_model, critic_optimizer,
                                          policy_optimizer, memory, updates, config)
