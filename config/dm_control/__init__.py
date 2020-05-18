@@ -1,6 +1,7 @@
+import gym
+
 from core.config import BaseConfig
 from core.env_wrapper import MultiStepWrapper
-import gym
 
 
 class DMControlWrapper(gym.Wrapper):

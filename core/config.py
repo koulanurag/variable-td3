@@ -1,6 +1,8 @@
 import os
 from typing import List
+
 import torch
+
 from core.model import TD3Network
 
 
@@ -22,7 +24,7 @@ class BaseConfig(object):
                  policy_delay: int = 2,
                  save_model_freq: int = 50,
                  replay_memory_capacity: int = 1000000,
-                 action_repeat_set: List[int] = [1, 2, 4, 8, 16, 32],
+                 action_repeat_set: List[int] = [2, 4, 8, 16, 32],
                  fixed_action_repeat=2,
                  test_episodes=2):
 
@@ -98,6 +100,7 @@ class BaseConfig(object):
         self.observation_space = env.observation_space
         self.action_space = env.action_space
         self.action_repeat_mode = args.action_repeat_mode
+        env.close()
 
         # training
         self.seed = args.seed

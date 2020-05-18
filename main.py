@@ -5,10 +5,11 @@ import sys
 
 import numpy as np
 import torch
+from torch.utils.tensorboard import SummaryWriter
+
 from core.test import test
 from core.train import train
 from core.utils import init_logger, make_results_dir
-from torch.utils.tensorboard import SummaryWriter
 
 if __name__ == '__main__':
     # Lets gather arguments

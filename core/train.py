@@ -23,7 +23,7 @@ def soft_update(target, source, tau):
         target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
 
 
-def update_params(model, target_model, critic_optimizer, policy_optimizer, memory, updates, config, writer):
+def update_params(model, target_model, critic_optimizer, policy_optimizer, memory, updates, config):
     # Sample a batch from memory
     batch = memory.sample(batch_size=config.batch_size)
 
@@ -103,18 +103,19 @@ def train(config: BaseConfig, writer: SummaryWriter):
         done = False
         episode_steps, episode_reward = 0, 0
         epsilon = get_epsilon(config.max_epsilon, config.min_epsilon, total_env_steps, config.max_env_steps)
-        state = env.reset()
 
+        state = env.reset()
         while not done:
             with torch.no_grad():
                 # noisy action
-                action = model.actor(torch.FloatTensor(state).unsqueeze(0))
-                noise = Normal(torch.tensor([0.0]), torch.tensor([config.exploration_noise]))
+                state = torch.FloatTensor(state).unsqueeze(0).to(config.device)
+                action = model.actor(state)
+                noise = Normal(torch.tensor([0.0]), torch.tensor([config.exploration_noise])).to(config.device)
                 action = action + noise.sample(action.shape).squeeze(-1)
                 action = config.clip_action(action)
 
                 # epsilon-greedy repeat
-                repeat_q = model.critic_1(torch.FloatTensor(state).unsqueeze(0), action)
+                repeat_q = model.critic_1(state, action)
                 if np.random.rand() <= epsilon:
                     repeat_idx = random.randrange(len(model.action_repeats))
                 else:
@@ -129,6 +130,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
             mask = 1 if (('TimeLimit.truncated' in info) and info['TimeLimit.truncated']) else float(not done)
 
             # Add to memory
+            state = state.data.cpu().numpy()[0]
             memory.push(state, action, repeat_idx, reward, next_state, mask)
 
             episode_steps += repeat
@@ -139,18 +141,19 @@ def train(config: BaseConfig, writer: SummaryWriter):
             # update network
             if len(memory) > config.batch_size:
                 critic_1_loss, critic_2_loss, policy_loss = 0, 0, 0
-                for i in range(config.updates_per_step * repeat):
-                    loss_data = update_params(model, target_model, critic_optimizer,
-                                              policy_optimizer, memory, updates, config, writer)
-                    critic_1_loss += loss_data[0]
-                    critic_2_loss += loss_data[1]
-                    policy_loss += loss_data[2]
+                update_count = config.updates_per_step * repeat
+                for i in range(update_count):
+                    loss = update_params(model, target_model, critic_optimizer,
+                                         policy_optimizer, memory, updates, config)
+                    critic_1_loss += loss[0]
+                    critic_2_loss += loss[1]
+                    policy_loss += loss[2]
 
                     updates += 1
 
-                critic_1_loss /= (config.updates_per_step * repeat)
-                critic_2_loss /= (config.updates_per_step * repeat)
-                policy_loss /= (config.updates_per_step * repeat)
+                critic_1_loss /= update_count
+                critic_2_loss /= update_count
+                policy_loss /= update_count
 
                 # Log
                 writer.add_scalar('train/critic_1_loss', critic_1_loss, total_env_steps)
@@ -162,7 +165,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
         writer.add_scalar('data/eps_steps', episode_steps, total_env_steps)
         writer.add_scalar('data/episodes', i_episode, total_env_steps)
         writer.add_scalar('data/epsilon', epsilon, total_env_steps)
-        writer.add_scalar('data/updates', updates, total_env_steps)
+        writer.add_scalar('train/updates', updates, total_env_steps)
 
         _msg = '#{} train score:{} eps steps: {} total steps: {} updates : {}'
         _msg = _msg.format(i_episode, round(episode_reward, 2), episode_steps, total_env_steps, updates)

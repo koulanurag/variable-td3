@@ -2,9 +2,11 @@ import pickle
 
 import numpy as np
 import torch
+from .model import TD3Network
+from .env_wrapper import MultiStepWrapper
 
 
-def _test(env, model, render):
+def _test(env: MultiStepWrapper, model: TD3Network, render: bool = False):
     episode_reward = 0
     action_repeats = []
 

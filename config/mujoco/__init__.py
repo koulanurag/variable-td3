@@ -1,11 +1,12 @@
+import gym
+
 from core.config import BaseConfig
 from core.env_wrapper import MultiStepWrapper
-import gym
 
 
 class MujocoConfig(BaseConfig):
     def __init__(self):
-        super(MujocoConfig, self).__init__(max_env_steps=int(10e6))
+        super(MujocoConfig, self).__init__(max_env_steps=int(1e6))
 
     def new_game(self, seed=None, save_video=False, save_path=None, video_callable=None, uid=None, eval=False):
         env = gym.make(self.env_name)

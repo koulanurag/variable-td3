@@ -1,13 +1,13 @@
+import gym
+
 from core.config import BaseConfig
 from core.env_wrapper import MultiStepWrapper
-import gym
 
 
 class Box2DConfig(BaseConfig):
     def __init__(self):
-        super(Box2DConfig, self).__init__(max_env_steps=int(10e5),
+        super(Box2DConfig, self).__init__(max_env_steps=int(2e5),
                                           lr=1e-3,
-                                          tau=0.01,
                                           replay_memory_capacity=100000,
                                           fixed_action_repeat=1)
 

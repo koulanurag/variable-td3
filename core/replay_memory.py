@@ -1,6 +1,7 @@
 import random
-import numpy as np
 from typing import List, NamedTuple
+
+import numpy as np
 
 
 class BatchOutput(NamedTuple):
