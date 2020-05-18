@@ -40,6 +40,7 @@ class ActorNetwork(nn.Module):
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, num_actions)
 
+        self.apply(weights_init_)
         self.action_scale = torch.FloatTensor((action_space.high - action_space.low) / 2.)
         self.action_bias = torch.FloatTensor((action_space.high + action_space.low) / 2.)
 
