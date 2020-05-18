@@ -40,7 +40,7 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
         # Select next action according to target policy:
         next_action = target_model.actor(next_state_batch)
         noise_dist = Normal(torch.tensor([0.0]), torch.tensor([config.policy_noise]))
-        noise = noise_dist.sample(next_action.shape).squeeze(-1)
+        noise = noise_dist.sample(next_action.shape).squeeze(-1).to(config.device)
         noise = noise.clamp(-config.noise_clip, config.noise_clip)
         next_action = next_action + noise
         next_action = config.clip_action(next_action)
@@ -110,8 +110,8 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 # noisy action
                 state = torch.FloatTensor(state).unsqueeze(0).to(config.device)
                 action = model.actor(state)
-                noise = Normal(torch.tensor([0.0]), torch.tensor([config.exploration_noise])).to(config.device)
-                action = action + noise.sample(action.shape).squeeze(-1)
+                noise = Normal(torch.tensor([0.0]), torch.tensor([config.exploration_noise]))
+                action = action + noise.sample(action.shape).squeeze(-1).to(config.device)
                 action = config.clip_action(action)
 
                 # epsilon-greedy repeat
