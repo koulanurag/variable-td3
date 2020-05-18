@@ -4,7 +4,7 @@ import shutil
 
 
 def get_epsilon(max_eps, min_eps, curr_steps, max_steps):
-    epsilon = max(min_eps, max_eps - (max_eps - min_eps) * curr_steps / (0.6 * max_steps))
+    epsilon = max(min_eps, max_eps - (max_eps - min_eps) * curr_steps / (0.5 * max_steps))
     return epsilon
 
 

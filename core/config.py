@@ -21,6 +21,7 @@ class BaseConfig(object):
                  min_epsilon: float = 0.1,
                  policy_noise: float = 0.2,
                  noise_clip: float = 0.5,
+                 grad_norm_clip: float = 10,
                  policy_delay: int = 2,
                  save_model_freq: int = 50,
                  replay_memory_capacity: int = 1000000,
@@ -33,6 +34,7 @@ class BaseConfig(object):
         self.batch_size = batch_size
         self.exploration_noise = exploration_noise
         self.updates_per_step = updates_per_step
+        self.grad_norm_clip = grad_norm_clip
         self.gamma = gamma
         self.lr = lr
         self.tau = tau

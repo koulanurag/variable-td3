@@ -61,6 +61,8 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
     # Update critic network
     critic_optimizer.zero_grad()
     (q1_loss + q2_loss).backward()
+    torch.nn.utils.clip_grad_norm_(model.critic_1.parameters(), config.grad_norm_clip)
+    torch.nn.utils.clip_grad_norm_(model.critic_2.parameters(), config.grad_norm_clip)
     critic_optimizer.step()
 
     # Compute Loss for Policy
@@ -73,6 +75,7 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
         critic_optimizer.zero_grad()
         policy_optimizer.zero_grad()
         policy_loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.actor.parameters(), config.grad_norm_clip)
         policy_optimizer.step()
 
     # Update target network
@@ -167,6 +170,8 @@ def train(config: BaseConfig, writer: SummaryWriter):
         writer.add_scalar('data/episodes', i_episode, total_env_steps)
         writer.add_scalar('data/epsilon', epsilon, total_env_steps)
         writer.add_scalar('train/updates', updates, total_env_steps)
+        for name, W in model.named_parameters():
+            writer.add_histogram('network_weights' + '/' + name, W.data.cpu().numpy(), total_env_steps)
 
         _msg = '#{} train score:{} eps steps: {} total steps: {} updates : {}'
         _msg = _msg.format(i_episode, round(episode_reward, 2), episode_steps, total_env_steps, updates)
