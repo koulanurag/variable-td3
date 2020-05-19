@@ -86,7 +86,8 @@ if __name__ == '__main__':
             model = model.to('cpu')
             model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 
-            env = run_config.new_game()
+            env = run_config.new_game(save_video=True,
+                                      video_dir_path=os.path.join(run_config.exp_path, 'recordings'))
             test_score, test_repeat_counts = test(env, model, args.test_episodes,
                                                   device='cpu', render=args.render,
                                                   save_test_data=True, save_path=run_config.test_data_path)
