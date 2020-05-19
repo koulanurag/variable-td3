@@ -31,7 +31,8 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
     state_batch = torch.FloatTensor(batch.state).to(config.device)
     next_state_batch = torch.FloatTensor(batch.next_state).to(config.device)
     action_batch = torch.FloatTensor(batch.action).to(config.device)
-    action_repeat_batch = torch.FloatTensor(batch.action_repeat).to(config.device).long().unsqueeze(1)
+    repeat_idx_batch = torch.FloatTensor(batch.repeat_idx).to(config.device).long().unsqueeze(1)
+    repeat_n_batch = torch.FloatTensor(batch.repeat_n).to(config.device).float().unsqueeze(1)
     reward_batch = torch.FloatTensor(batch.reward).to(config.device).unsqueeze(1)
     mask_batch = torch.FloatTensor(batch.mask).to(config.device).unsqueeze(1)
 
@@ -49,14 +50,14 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
         q2_next_target = target_model.critic_2(next_state_batch, next_action)
         min_q_next_target = torch.min(q1_next_target, q2_next_target)
         max_q_repeat_target = min_q_next_target.max(dim=1)[0].unsqueeze(1)
-        next_q_value = reward_batch + (mask_batch * config.gamma * max_q_repeat_target)
+        next_q_value = reward_batch + (mask_batch * (config.gamma ** repeat_n_batch) * max_q_repeat_target)
 
     # Compute Loss for  Q_values
     q1 = model.critic_1(state_batch, action_batch)
     q2 = model.critic_2(state_batch, action_batch)
 
-    q1_loss = MSELoss()(q1.gather(1, action_repeat_batch), next_q_value)
-    q2_loss = MSELoss()(q2.gather(1, action_repeat_batch), next_q_value)
+    q1_loss = MSELoss()(q1.gather(1, repeat_idx_batch), next_q_value)
+    q2_loss = MSELoss()(q2.gather(1, repeat_idx_batch), next_q_value)
 
     # Update critic network
     critic_optimizer.zero_grad()
@@ -124,25 +125,25 @@ def train(config: BaseConfig, writer: SummaryWriter):
 
             # step
             action = action.data.cpu().numpy()[0]
-            repeat = model.action_repeats[repeat_idx]
-            next_state, reward, done, info = env.step(action, repeat)
+            repeat_n = model.action_repeats[repeat_idx]
+            next_state, reward, done, info = env.step(action, repeat_n)
 
             # Ignore the "done" signal if it comes from hitting the time horizon.
             mask = 1 if (('TimeLimit.truncated' in info) and info['TimeLimit.truncated']) else float(not done)
 
             # Add to memory
             state = state.data.cpu().numpy()[0]
-            memory.push(state, action, repeat_idx, reward, next_state, mask)
+            memory.push(state, action, repeat_n, repeat_idx, reward, next_state, mask)
 
-            episode_steps += info['repeat']
-            total_env_steps += info['repeat']
+            episode_steps += info['steps']
+            total_env_steps += info['steps']
             episode_reward += reward
             state = next_state
 
             # update network
             if len(memory) > config.batch_size:
                 critic_1_loss, critic_2_loss, policy_loss = 0, 0, 0
-                update_count = config.updates_per_step * info['repeat']
+                update_count = config.updates_per_step * info['steps']
                 for i in range(update_count):
                     loss = update_params(model, target_model, critic_optimizer,
                                          policy_optimizer, memory, updates, config)

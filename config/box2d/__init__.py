@@ -19,7 +19,7 @@ class Box2DConfig(BaseConfig):
         if save_video:
             from gym.wrappers import Monitor
             env = Monitor(env, directory=save_path, force=True, video_callable=video_callable, uid=uid)
-        return MultiStepWrapper(env)
+        return MultiStepWrapper(env, self.gamma)
 
 
 run_config = Box2DConfig()
