@@ -61,7 +61,7 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
                 min_q_next_target = torch.min(q1_next_target, q2_next_target)
                 max_q_repeat_target = min_q_next_target.max(dim=1)[0]
                 next_q_value = valid_reward_batch + \
-                               (valid_terminal_batch * (config.gamma ** repeat_n) * max_q_repeat_target)
+                               ((1 - valid_terminal_batch) * (config.gamma ** repeat_n) * max_q_repeat_target)
 
             q1_loss += MSELoss()(q1[:, repeat_i][next_state_mask_batch[:, repeat_i]], next_q_value)
             q2_loss += MSELoss()(q2[:, repeat_i][next_state_mask_batch[:, repeat_i]], next_q_value)
