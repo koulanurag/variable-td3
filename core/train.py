@@ -11,7 +11,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from core.utils import get_epsilon
 from .config import BaseConfig
-from .replay_memory import ReplayMemory
+from .replay_memory import ReplayMemory, BatchOutput
 from .test import test
 
 train_logger = logging.getLogger('train')
@@ -25,39 +25,46 @@ def soft_update(target, source, tau):
 
 def update_params(model, target_model, critic_optimizer, policy_optimizer, memory, updates, config):
     # Sample a batch from memory
-    batch = memory.sample(batch_size=config.batch_size)
+    batch: BatchOutput = memory.sample(batch_size=config.batch_size)
 
     # pre-process batch
     state_batch = torch.FloatTensor(batch.state).to(config.device)
     next_state_batch = torch.FloatTensor(batch.next_state).to(config.device)
+    next_state_mask_batch = torch.FloatTensor(batch.next_state_mask).to(config.device).bool()
     action_batch = torch.FloatTensor(batch.action).to(config.device)
-    repeat_idx_batch = torch.FloatTensor(batch.repeat_idx).to(config.device).long().unsqueeze(1)
-    repeat_n_batch = torch.FloatTensor(batch.repeat_n).to(config.device).float().unsqueeze(1)
-    reward_batch = torch.FloatTensor(batch.reward).to(config.device).unsqueeze(1)
-    mask_batch = torch.FloatTensor(batch.mask).to(config.device).unsqueeze(1)
-
-    # Compute Targets for Q values
-    with torch.no_grad():
-        # Select next action according to target policy:
-        next_action = target_model.actor(next_state_batch)
-        noise_dist = Normal(torch.tensor([0.0]), torch.tensor([config.policy_noise]))
-        noise = noise_dist.sample(next_action.shape).squeeze(-1).to(config.device)
-        noise = noise.clamp(-config.noise_clip, config.noise_clip)
-        next_action = next_action + noise
-        next_action = config.clip_action(next_action)
-
-        q1_next_target = target_model.critic_1(next_state_batch, next_action)
-        q2_next_target = target_model.critic_2(next_state_batch, next_action)
-        min_q_next_target = torch.min(q1_next_target, q2_next_target)
-        max_q_repeat_target = min_q_next_target.max(dim=1)[0].unsqueeze(1)
-        next_q_value = reward_batch + (mask_batch * (config.gamma ** repeat_n_batch) * max_q_repeat_target)
+    reward_batch = torch.FloatTensor(batch.reward).to(config.device)
+    terminal_batch = torch.FloatTensor(batch.terminal).to(config.device)
 
     # Compute Loss for  Q_values
     q1 = model.critic_1(state_batch, action_batch)
     q2 = model.critic_2(state_batch, action_batch)
+    q1_loss, q2_loss = 0, 0
 
-    q1_loss = MSELoss()(q1.gather(1, repeat_idx_batch), next_q_value)
-    q2_loss = MSELoss()(q2.gather(1, repeat_idx_batch), next_q_value)
+    # Compute Targets for Q values
+    for repeat_i in range(len(model.action_repeats)):
+        valid_next_state_batch = next_state_batch[:, repeat_i][next_state_mask_batch[:, repeat_i]]
+        valid_reward_batch = reward_batch[:, repeat_i][next_state_mask_batch[:, repeat_i]]
+        valid_terminal_batch = terminal_batch[:, repeat_i][next_state_mask_batch[:, repeat_i]]
+        repeat_n = config.action_repeat_set[repeat_i]
+
+        if len(valid_next_state_batch) > 0:
+            with torch.no_grad():
+                next_action = target_model.actor(valid_next_state_batch)
+                noise_dist = Normal(torch.tensor([0.0]), torch.tensor([config.policy_noise]))
+                noise = noise_dist.sample(next_action.shape).squeeze(-1).to(config.device)
+                noise = noise.clamp(-config.noise_clip, config.noise_clip)
+                next_action = next_action + noise
+                next_action = config.clip_action(next_action)
+
+                q1_next_target = target_model.critic_1(valid_next_state_batch, next_action)
+                q2_next_target = target_model.critic_2(valid_next_state_batch, next_action)
+                min_q_next_target = torch.min(q1_next_target, q2_next_target)
+                max_q_repeat_target = min_q_next_target.max(dim=1)[0]
+                next_q_value = valid_reward_batch + \
+                               (valid_terminal_batch * (config.gamma ** repeat_n) * max_q_repeat_target)
+
+            q1_loss += MSELoss()(q1[:, repeat_i][next_state_mask_batch[:, repeat_i]], next_q_value)
+            q2_loss += MSELoss()(q2[:, repeat_i][next_state_mask_batch[:, repeat_i]], next_q_value)
 
     # Update critic network
     critic_optimizer.zero_grad()
@@ -108,6 +115,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
 
         state = env.reset()
         while not done:
+
             with torch.no_grad():
                 # noisy action
                 state = torch.FloatTensor(state).unsqueeze(0).to(config.device)
@@ -123,22 +131,43 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 else:
                     repeat_idx = repeat_q.argmax(1).item()
 
-            # step
             action = action.data.cpu().numpy()[0]
             repeat_n = model.action_repeats[repeat_idx]
-            next_state, reward, done, info = env.step(action, repeat_n)
+
+            # step
+            discounted_reward_sum, reward_sum = 0, 0
+            next_states, rewards = [], []
+            for repeat_i in range(1, repeat_n + 1):
+                next_state, reward, done, info = env.step(action)
+                discounted_reward_sum += (config.gamma ** repeat_i) * reward
+                reward_sum += reward
+                episode_steps += 1
+                total_env_steps += 1
+                episode_reward += reward
+
+                if (repeat_i in model.action_repeats) or done:
+                    next_states.append(next_state)
+                    rewards.append(discounted_reward_sum)
+
+                if done:
+                    break
 
             # Ignore the "done" signal if it comes from hitting the time horizon.
-            mask = 1 if (('TimeLimit.truncated' in info) and info['TimeLimit.truncated']) else float(not done)
+            terminal = 0 if (('TimeLimit.truncated' in info) and info['TimeLimit.truncated']) else float(done)
+            terminals = [0 for _ in range(len(next_states) - 1)]
+            terminals += [terminal for _ in range(len(model.action_repeats) - len(terminals))]
+
+            next_state_mask = [1 for _ in range(len(next_states))]
+            if len(next_states) < len(model.action_repeats):
+                next_state_mask += [0 for _ in range(len(model.action_repeats) - len(rewards))]
+                next_states += [next_states[-1] for _ in range(len(model.action_repeats) - len(next_states))]
+                rewards += [rewards[-1] for _ in range(len(model.action_repeats) - len(rewards))]
 
             # Add to memory
             state = state.data.cpu().numpy()[0]
-            memory.push(state, action, repeat_n, repeat_idx, reward, next_state, mask)
+            memory.push(state, action, rewards, next_states, next_state_mask, terminals)
 
-            episode_steps += info['steps']
-            total_env_steps += info['steps']
-            episode_reward += reward
-            state = next_state
+            state = next_states[-1]
 
             # update network
             if len(memory) > config.batch_size:

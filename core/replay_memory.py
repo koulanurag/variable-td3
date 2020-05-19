@@ -7,11 +7,10 @@ import numpy as np
 class BatchOutput(NamedTuple):
     state: List[List[float]]
     action: List[List[float]]
-    repeat_n: List[int]
-    repeat_idx: List[int]
-    reward: List[float]
-    next_state: List[List[float]]
-    mask: List[bool]
+    reward: List[List[float]]
+    next_state: List[List[List[float]]]
+    next_state_mask: List[List[float]]
+    terminal: List[List[bool]]
 
 
 class ReplayMemory:
@@ -20,16 +19,16 @@ class ReplayMemory:
         self.buffer = []
         self.position = 0
 
-    def push(self, state, action, repeat_n, repeat_idx, reward, next_state, done):
+    def push(self, state, action, reward, next_state, next_state_mask, terminal):
         if len(self.buffer) < self.capacity:
             self.buffer.append(None)
-        self.buffer[self.position] = (state, action, repeat_n, repeat_idx, reward, next_state, done)
+        self.buffer[self.position] = (state, action, reward, next_state, next_state_mask, terminal)
         self.position = (self.position + 1) % self.capacity
 
     def sample(self, batch_size):
         batch = random.sample(self.buffer, batch_size)
-        state, action, repeat_n, repeat_idx, reward, next_state, done = map(np.stack, zip(*batch))
-        return BatchOutput(state, action, repeat_n, repeat_idx, reward, next_state, done)
+        state, action, reward, next_state, next_state_mask, terminal = map(np.stack, zip(*batch))
+        return BatchOutput(state, action, reward, next_state, next_state_mask, terminal)
 
     def __len__(self):
         return len(self.buffer)
