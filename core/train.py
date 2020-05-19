@@ -135,15 +135,17 @@ def train(config: BaseConfig, writer: SummaryWriter):
             repeat_n = model.action_repeats[repeat_idx]
 
             # step
-            discounted_reward_sum, reward_sum = 0, 0
+            discounted_reward_sum = 0
             next_states, rewards = [], []
+
+            step = 0
             for repeat_i in range(1, repeat_n + 1):
                 next_state, reward, done, info = env.step(action)
                 discounted_reward_sum += (config.gamma ** repeat_i) * reward
-                reward_sum += reward
                 episode_steps += 1
                 total_env_steps += 1
                 episode_reward += reward
+                step += 1
 
                 if (repeat_i in model.action_repeats) or done:
                     next_states.append(next_state)
@@ -172,7 +174,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
             # update network
             if len(memory) > config.batch_size:
                 critic_1_loss, critic_2_loss, policy_loss = 0, 0, 0
-                update_count = config.updates_per_step * info['steps']
+                update_count = config.updates_per_step * step
                 for i in range(update_count):
                     loss = update_params(model, target_model, critic_optimizer,
                                          policy_optimizer, memory, updates, config)
