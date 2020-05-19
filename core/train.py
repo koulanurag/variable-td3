@@ -127,11 +127,10 @@ def train(config: BaseConfig, writer: SummaryWriter):
 
                 # epsilon-greedy repeat
                 repeat_q = model.critic_1(state, action)
-                repeat_idx = Categorical(torch.softmax(repeat_q, dim=1)).sample().item()
-                # if np.random.rand() <= epsilon:
-                #     repeat_idx = Categorical(torch.softmax(repeat_q,dim=1)).sample().item()
-                # else:
-                #     repeat_idx = repeat_q.argmax(1).item()
+                if np.random.rand() <= epsilon:
+                    repeat_idx = random.randint(0, len(model.action_repeats) - 1)
+                else:
+                    repeat_idx = repeat_q.argmax(1).item()
 
             action = action.data.cpu().numpy()[0]
             repeat_n = model.action_repeats[repeat_idx]
