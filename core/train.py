@@ -8,6 +8,7 @@ from torch.distributions import Normal
 from torch.nn import MSELoss
 from torch.optim import Adam
 from torch.utils.tensorboard import SummaryWriter
+from torch.distributions import Categorical
 
 from core.utils import get_epsilon
 from .config import BaseConfig
@@ -126,10 +127,11 @@ def train(config: BaseConfig, writer: SummaryWriter):
 
                 # epsilon-greedy repeat
                 repeat_q = model.critic_1(state, action)
-                if np.random.rand() <= epsilon:
-                    repeat_idx = random.randrange(len(model.action_repeats))
-                else:
-                    repeat_idx = repeat_q.argmax(1).item()
+                # if np.random.rand() <= epsilon:
+                #     repeat_idx = torch.softmax(repeat_q).sample()
+                # else:
+                #     repeat_idx = repeat_q.argmax(1).item()
+                repeat_idx = Categorical(torch.softmax(repeat_q, dim=1)).sample().item()
 
             action = action.data.cpu().numpy()[0]
             repeat_n = model.action_repeats[repeat_idx]
