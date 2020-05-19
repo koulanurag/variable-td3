@@ -17,7 +17,7 @@ class CassieConfig(BaseConfig):
         if save_video:
             from gym.wrappers import Monitor
             env = Monitor(env, directory=save_path, force=True, video_callable=video_callable, uid=uid)
-        return MultiStepWrapper(env,self.gamma)
+        return MultiStepWrapper(env)
 
 
 run_config = CassieConfig()
