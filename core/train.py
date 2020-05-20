@@ -145,7 +145,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
 
             # step
             discounted_reward_sum = 0
-            next_states, rewards = [], []
+            next_states, rewards, terminals = [], [], []
 
             step = 0
             for repeat_i in range(1, repeat_n + 1):
@@ -160,17 +160,19 @@ def train(config: BaseConfig, writer: SummaryWriter):
                     next_states.append(next_state)
                     rewards.append(discounted_reward_sum)
 
+                    # Ignore the "done" signal if it comes from hitting the time horizon.
+                    terminal = 0 if (('TimeLimit.truncated' in info) and info['TimeLimit.truncated']) else float(done)
+                    terminals.append(terminal)
+
                 if done:
                     break
-
-            # Ignore the "done" signal if it comes from hitting the time horizon.
-            terminal = 0 if (('TimeLimit.truncated' in info) and info['TimeLimit.truncated']) else float(done)
-            terminals = [0 for _ in range(len(next_states) - 1)]
-            terminals += [terminal for _ in range(len(model.action_repeats) - len(terminals))]
 
             next_state_mask = [1 for _ in range(len(next_states))]
             if len(next_states) < len(model.action_repeats):
                 next_state_mask += [0 for _ in range(len(model.action_repeats) - len(rewards))]
+
+                # Note: these values will be ignored during update
+                terminals += [float('-inf') for _ in range(len(model.action_repeats) - len(terminals))]
                 next_states += [np.ones(next_states[-1].shape)
                                 for _ in range(len(model.action_repeats) - len(next_states))]
                 rewards += [float('-inf') for _ in range(len(model.action_repeats) - len(rewards))]
@@ -202,6 +204,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 writer.add_scalar('train/critic_1_loss', critic_1_loss, total_env_steps)
                 writer.add_scalar('train/critic_2_loss', critic_1_loss, total_env_steps)
                 writer.add_scalar('train/policy_loss', policy_loss, total_env_steps)
+                print(round(critic_1_loss,2), round(critic_2_loss,2), round(policy_loss,2))
 
         # log episode data
         writer.add_scalar('data/eps_reward', episode_reward, total_env_steps)
