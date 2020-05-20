@@ -39,14 +39,14 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
     # Compute Loss for  Q_values
     q1 = model.critic_1(state_batch, action_batch)
     q2 = model.critic_2(state_batch, action_batch)
-    q1_loss, q2_loss = 0, 0
+    q1_loss, q2_loss = torch.zeros(reward_batch.shape), torch.zeros(reward_batch.shape)
 
     # Compute Targets for Q values
     for repeat_i in range(len(model.action_repeats)):
         valid_next_state_batch = next_state_batch[:, repeat_i][next_state_mask_batch[:, repeat_i]]
         valid_reward_batch = reward_batch[:, repeat_i][next_state_mask_batch[:, repeat_i]]
         valid_terminal_batch = terminal_batch[:, repeat_i][next_state_mask_batch[:, repeat_i]]
-        repeat_n = config.action_repeat_set[repeat_i]
+        repeat_n = model.action_repeats[repeat_i]
 
         if len(valid_next_state_batch) > 0:
             with torch.no_grad():
@@ -64,11 +64,19 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
                 next_q_value = valid_reward_batch + \
                                ((1 - valid_terminal_batch) * (config.gamma ** repeat_n) * max_q_repeat_target)
 
-            q1_loss += MSELoss()(q1[:, repeat_i][next_state_mask_batch[:, repeat_i]], next_q_value)
-            q2_loss += MSELoss()(q2[:, repeat_i][next_state_mask_batch[:, repeat_i]], next_q_value)
+            mse = MSELoss(reduction='none')
+            q1_src = q1[:, repeat_i][next_state_mask_batch[:, repeat_i]]
+            q1_loss[:, repeat_i][next_state_mask_batch[:, repeat_i]] = mse(q1_src, next_q_value)
+
+            q2_src = q2[:, repeat_i][next_state_mask_batch[:, repeat_i]]
+            q2_loss[:, repeat_i][next_state_mask_batch[:, repeat_i]] = mse(q2_src, next_q_value)
 
     # Update critic network
     critic_optimizer.zero_grad()
+    q1_loss /= next_state_mask_batch.sum(dim=1).unsqueeze(1)
+    q2_loss /= next_state_mask_batch.sum(dim=1).unsqueeze(1)
+    q1_loss = q1_loss.mean()
+    q2_loss = q2_loss.mean()
     (q1_loss + q2_loss).backward()
     critic_optimizer.step()
 
@@ -163,8 +171,9 @@ def train(config: BaseConfig, writer: SummaryWriter):
             next_state_mask = [1 for _ in range(len(next_states))]
             if len(next_states) < len(model.action_repeats):
                 next_state_mask += [0 for _ in range(len(model.action_repeats) - len(rewards))]
-                next_states += [next_states[-1] for _ in range(len(model.action_repeats) - len(next_states))]
-                rewards += [rewards[-1] for _ in range(len(model.action_repeats) - len(rewards))]
+                next_states += [np.ones(next_states[-1].shape)
+                                for _ in range(len(model.action_repeats) - len(next_states))]
+                rewards += [float('-inf') for _ in range(len(model.action_repeats) - len(rewards))]
 
             # Add to memory
             state = state.data.cpu().numpy()[0]
