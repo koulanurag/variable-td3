@@ -8,7 +8,6 @@ from torch.distributions import Normal
 from torch.nn import MSELoss
 from torch.optim import Adam
 from torch.utils.tensorboard import SummaryWriter
-from torch.distributions import Categorical
 
 from core.utils import get_epsilon
 from .config import BaseConfig
@@ -77,10 +76,8 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
 
     # Update critic network
     critic_optimizer.zero_grad()
-    q1_loss /= next_state_mask_batch.sum(dim=1).unsqueeze(1)
-    q2_loss /= next_state_mask_batch.sum(dim=1).unsqueeze(1)
-    q1_loss = q1_loss.mean()
-    q2_loss = q2_loss.mean()
+    q1_loss = (q1_loss.sum(dim=1) / next_state_mask_batch.sum(dim=1)).mean()
+    q2_loss = (q2_loss.sum(dim=1) / next_state_mask_batch.sum(dim=1)).mean()
     (q1_loss + q2_loss).backward()
     critic_optimizer.step()
 
@@ -140,7 +137,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 # epsilon-greedy repeat
                 repeat_q = model.critic_1(state, action)
                 if np.random.rand() <= epsilon:
-                    repeat_idx = random.randint(0, len(model.action_repeats) - 1)
+                    repeat_idx = np.random.randint(0, len(model.action_repeats))
                 else:
                     repeat_idx = repeat_q.argmax(1).item()
 
@@ -171,9 +168,9 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 if done:
                     break
 
-            next_state_mask = [1 for _ in range(len(next_states))]
+            next_state_mask = [0 for _ in range(len(next_states) - 1)] + [1]
             if len(next_states) < len(model.action_repeats):
-                next_state_mask += [0 for _ in range(len(model.action_repeats) - len(rewards))]
+                next_state_mask += [0 for _ in range(len(model.action_repeats) - len(next_state_mask))]
 
                 # Note: these values will be ignored during update
                 terminals += [float('-inf') for _ in range(len(model.action_repeats) - len(terminals))]
@@ -208,7 +205,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 writer.add_scalar('train/critic_1_loss', critic_1_loss, total_env_steps)
                 writer.add_scalar('train/critic_2_loss', critic_1_loss, total_env_steps)
                 writer.add_scalar('train/policy_loss', policy_loss, total_env_steps)
-                # print(round(critic_1_loss, 2), round(critic_2_loss, 2), round(policy_loss, 2))
+                print(round(critic_1_loss, 2), round(critic_2_loss, 2), round(policy_loss, 2))
 
         # log episode data
         writer.add_scalar('data/eps_reward', episode_reward, total_env_steps)
