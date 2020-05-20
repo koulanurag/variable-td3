@@ -24,7 +24,7 @@ def soft_update(target, source, tau):
         target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
 
 
-def update_params(model, target_model, critic_optimizer, policy_optimizer, memory, updates, config):
+def update_params(model, target_model, critic_optimizer, policy_optimizer, memory, updates, config, writer):
     # Sample a batch from memory
     batch: BatchOutput = memory.sample(batch_size=config.batch_size)
 
@@ -70,6 +70,10 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
 
             q2_src = q2[:, repeat_i][next_state_mask_batch[:, repeat_i]]
             q2_loss[:, repeat_i][next_state_mask_batch[:, repeat_i]] = mse(q2_src, next_q_value)
+
+            if repeat_i == 0:
+                writer.add_histogram('next_q_value', next_q_value, updates)
+                writer.add_histogram('q1', q1_src, updates)
 
     # Update critic network
     critic_optimizer.zero_grad()
@@ -189,7 +193,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 update_count = config.updates_per_step * step
                 for i in range(update_count):
                     loss = update_params(model, target_model, critic_optimizer,
-                                         policy_optimizer, memory, updates, config)
+                                         policy_optimizer, memory, updates, config, writer)
                     critic_1_loss += loss[0]
                     critic_2_loss += loss[1]
                     policy_loss += loss[2]
@@ -204,7 +208,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 writer.add_scalar('train/critic_1_loss', critic_1_loss, total_env_steps)
                 writer.add_scalar('train/critic_2_loss', critic_1_loss, total_env_steps)
                 writer.add_scalar('train/policy_loss', policy_loss, total_env_steps)
-                print(round(critic_1_loss,2), round(critic_2_loss,2), round(policy_loss,2))
+                # print(round(critic_1_loss, 2), round(critic_2_loss, 2), round(policy_loss, 2))
 
         # log episode data
         writer.add_scalar('data/eps_reward', episode_reward, total_env_steps)
