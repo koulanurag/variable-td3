@@ -170,7 +170,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 if done:
                     break
 
-            next_state_mask = [0 for _ in range(len(next_states) - 1)] + [1]
+            next_state_mask = [1 for _ in range(len(next_states) - 1)] + [1]
             if len(next_states) < len(model.action_repeats):
                 next_state_mask += [0 for _ in range(len(model.action_repeats) - len(next_state_mask))]
 
