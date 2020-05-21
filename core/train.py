@@ -5,7 +5,7 @@ import random
 import numpy as np
 import torch
 from torch.distributions import Normal
-from torch.nn import MSELoss
+from torch.nn import L1Loss
 from torch.optim import Adam
 from torch.utils.tensorboard import SummaryWriter
 from torch.distributions import Categorical
@@ -63,7 +63,7 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
                 next_q_value = valid_reward_batch + \
                                ((1 - valid_terminal_batch) * (config.gamma ** repeat_n) * max_q_repeat_target)
 
-            mse = MSELoss(reduction='none')
+            mse = L1Loss(reduction='none')
             q1_src = q1[:, repeat_i][next_state_mask_batch[:, repeat_i]]
             q1_loss[:, repeat_i][next_state_mask_batch[:, repeat_i]] = mse(q1_src, next_q_value)
 
@@ -120,7 +120,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
     for i_episode in itertools.count(1):
 
         done = False
-        episode_steps, episode_reward = 0, 0
+        episode_steps, episode_reward, epsiode_repeats = 0, 0, []
         epsilon = get_epsilon(config.max_epsilon, config.min_epsilon, total_env_steps, config.max_env_steps)
 
         state = env.reset()
@@ -140,10 +140,13 @@ def train(config: BaseConfig, writer: SummaryWriter):
                     # epsilon-greedy repeat
                     repeat_q = model.critic_1(state, action)
                     repeat_idx = Categorical(torch.softmax(repeat_q, dim=1)).sample().item()
+
+                state = state.data.cpu().numpy()[0]
                 action = action.data.cpu().numpy()[0]
                 repeat_n = model.action_repeats[repeat_idx]
 
             # step
+            epsiode_repeats.append(repeat_n)
             discounted_reward_sum = 0
             next_states, rewards, terminals = [], [], []
 
@@ -178,7 +181,6 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 rewards += [float('-inf') for _ in range(len(model.action_repeats) - len(rewards))]
 
             # Add to memory
-            state = state.data.cpu().numpy()[0]
             memory.push(state, action, rewards, next_states, next_state_mask, terminals)
 
             state = next_states[-1]
@@ -204,11 +206,12 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 writer.add_scalar('train/critic_1_loss', critic_1_loss, total_env_steps)
                 writer.add_scalar('train/critic_2_loss', critic_1_loss, total_env_steps)
                 writer.add_scalar('train/policy_loss', policy_loss, total_env_steps)
-                print(round(critic_1_loss, 2), round(critic_2_loss, 2), round(policy_loss, 2))
+                # print(round(critic_1_loss, 2), round(critic_2_loss, 2), round(policy_loss, 2))
 
         # log episode data
         writer.add_scalar('data/eps_reward', episode_reward, total_env_steps)
         writer.add_scalar('data/eps_steps', episode_steps, total_env_steps)
+        writer.add_scalar('data/eps_repeats', np.array(epsiode_repeats).mean(), total_env_steps)
         writer.add_scalar('data/episodes', i_episode, total_env_steps)
         writer.add_scalar('data/epsilon', epsilon, total_env_steps)
         writer.add_scalar('train/updates', updates, total_env_steps)
