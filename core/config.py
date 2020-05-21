@@ -9,7 +9,8 @@ from core.model import TD3Network
 class BaseConfig(object):
 
     def __init__(self,
-                 max_env_steps: int = 10e5,
+                 max_env_steps: int,
+                 start_step: int,
                  batch_size: int = 100,
                  updates_per_step: int = 1,
                  exploration_noise: float = 0.1,
@@ -31,6 +32,7 @@ class BaseConfig(object):
 
         # training
         self.max_env_steps = max_env_steps
+        self.start_step = start_step
         self.batch_size = batch_size
         self.exploration_noise = exploration_noise
         self.updates_per_step = updates_per_step
@@ -71,7 +73,7 @@ class BaseConfig(object):
         self.best_model_path = None
         self.test_data_path = None
 
-    def new_game(self, seed=None, save_video=False, save_path=None, video_callable=None, uid=None):
+    def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
         raise NotImplementedError
 
     def get_uniform_network(self):

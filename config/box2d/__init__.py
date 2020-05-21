@@ -7,6 +7,7 @@ from core.env_wrapper import MultiStepWrapper
 class Box2DConfig(BaseConfig):
     def __init__(self):
         super(Box2DConfig, self).__init__(max_env_steps=int(2e5),
+                                          start_step=int(1e4),
                                           lr=1e-3,
                                           replay_memory_capacity=50000,
                                           fixed_action_repeat=1)
