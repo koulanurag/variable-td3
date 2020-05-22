@@ -14,8 +14,8 @@ class BatchOutput(NamedTuple):
 
 
 class ReplayMemory:
-    def __init__(self, capacity):
-        self.capacity = capacity
+    def __init__(self, capacity:int):
+        self.capacity = int(capacity)
         self.buffer = []
         self.position = 0
 
