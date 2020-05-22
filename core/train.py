@@ -5,7 +5,7 @@ import random
 import numpy as np
 import torch
 from torch.distributions import Normal
-from torch.nn import L1Loss
+from torch.nn import L1Loss, MSELoss
 from torch.optim import Adam
 from torch.utils.tensorboard import SummaryWriter
 from torch.distributions import Categorical
@@ -63,7 +63,7 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
                 next_q_value = valid_reward_batch + \
                                ((1 - valid_terminal_batch) * (config.gamma ** repeat_n) * max_q_repeat_target)
 
-            mse = L1Loss(reduction='none')
+            mse = MSELoss(reduction='none')
             q1_src = q1[:, repeat_i][next_state_mask_batch[:, repeat_i]]
             q1_loss[:, repeat_i][next_state_mask_batch[:, repeat_i]] = mse(q1_src, next_q_value)
 

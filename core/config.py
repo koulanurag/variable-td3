@@ -25,7 +25,7 @@ class BaseConfig(object):
                  grad_norm_clip: float = 10,
                  policy_delay: int = 2,
                  save_model_freq: int = 50,
-                 replay_memory_capacity: int = 1000000,
+                 replay_memory_capacity: int = 1e6,
                  action_repeat_set: List[int] = [2, 4, 8, 16],
                  fixed_action_repeat=2,
                  test_episodes=2):
