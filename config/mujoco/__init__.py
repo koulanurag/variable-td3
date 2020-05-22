@@ -11,14 +11,14 @@ class MujocoConfig(BaseConfig):
                                            replay_memory_capacity=100000,
                                            fixed_action_repeat=1)
 
-    def new_game(self, seed=None, save_video=False, save_path=None, video_callable=None, uid=None, eval=False):
+    def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
         env = gym.make(self.env_name)
         if seed is not None:
             env.seed(seed)
 
         if save_video:
             from gym.wrappers import Monitor
-            env = Monitor(env, directory=save_path, force=True, video_callable=video_callable, uid=uid)
+            env = Monitor(env, directory=video_dir_path, force=True, video_callable=lambda episode_id: True, uid=uid)
         return MultiStepWrapper(env)
 
 
