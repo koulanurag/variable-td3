@@ -206,7 +206,6 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 writer.add_scalar('train/critic_1_loss', critic_1_loss, total_env_steps)
                 writer.add_scalar('train/critic_2_loss', critic_2_loss, total_env_steps)
                 writer.add_scalar('train/policy_loss', policy_loss, total_env_steps)
-                # print(round(critic_1_loss, 2), round(critic_2_loss, 2), round(policy_loss, 2))
 
         # log episode data
         writer.add_scalar('data/eps_reward', episode_reward, total_env_steps)
