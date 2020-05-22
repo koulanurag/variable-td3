@@ -11,7 +11,7 @@ class BaseConfig(object):
     def __init__(self,
                  max_env_steps: int,
                  start_step: int,
-                 batch_size: int = 100,
+                 batch_size: int = 256,
                  updates_per_step: int = 1,
                  exploration_noise: float = 0.1,
                  lr: float = 1e-3,
