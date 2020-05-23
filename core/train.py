@@ -119,10 +119,11 @@ def train(config: BaseConfig, writer: SummaryWriter):
 
         done = False
         episode_steps, episode_reward, epsiode_repeats = 0, 0, []
-        epsilon = get_epsilon(config.max_epsilon, config.min_epsilon, total_env_steps, config.max_env_steps)
 
         state = env.reset()
         while not done:
+            epsilon = get_epsilon(config.max_epsilon, config.min_epsilon, total_env_steps, config.max_env_steps)
+
             if total_env_steps < config.start_step:
                 action = env.action_space.sample()
                 repeat_n = np.random.choice(model.action_repeats)

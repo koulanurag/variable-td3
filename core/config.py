@@ -19,7 +19,7 @@ class BaseConfig(object):
                  gamma: float = 0.99,
                  alpha: float = 0.2,
                  max_epsilon: float = 1,
-                 min_epsilon: float = 0.1,
+                 min_epsilon: float = 0.05,
                  policy_noise: float = 0.2,
                  noise_clip: float = 0.5,
                  grad_norm_clip: float = 10,
