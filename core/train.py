@@ -7,7 +7,6 @@ from torch.distributions import Normal
 from torch.nn import MSELoss
 from torch.optim import Adam
 from torch.utils.tensorboard import SummaryWriter
-from torch.distributions import Categorical
 from core.utils import get_epsilon
 from .config import BaseConfig
 from .replay_memory import ReplayMemory, BatchOutput
@@ -138,7 +137,10 @@ def train(config: BaseConfig, writer: SummaryWriter):
 
                     # epsilon-greedy repeat
                     repeat_q = model.critic_1(state, action)
-                    repeat_idx = Categorical(torch.softmax(repeat_q, dim=1)).sample().item()
+                    if np.random.rand() <= epsilon:
+                        repeat_idx = np.random.randint(0, len(model.action_repeats) - 1)
+                    else:
+                        repeat_idx = repeat_q.argmax(1).item()
 
                 state = state.data.cpu().numpy()[0]
                 action = action.data.cpu().numpy()[0]
