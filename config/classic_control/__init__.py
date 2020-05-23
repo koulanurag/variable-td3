@@ -4,13 +4,13 @@ from core.config import BaseConfig
 from core.env_wrapper import MultiStepWrapper
 
 
-class Box2DConfig(BaseConfig):
+class ClassicControlConfig(BaseConfig):
     def __init__(self):
-        super(Box2DConfig, self).__init__(max_env_steps=int(5e5),
-                                          start_step=int(5e3),
-                                          lr=1e-3,
-                                          replay_memory_capacity=int(1e5),
-                                          fixed_action_repeat=1)
+        super(ClassicControlConfig, self).__init__(max_env_steps=int(3e5),
+                                                   start_step=int(3e3),
+                                                   lr=1e-3,
+                                                   replay_memory_capacity=1e5,
+                                                   fixed_action_repeat=1)
 
     def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
         env = gym.make(self.env_name)
@@ -23,4 +23,4 @@ class Box2DConfig(BaseConfig):
         return MultiStepWrapper(env)
 
 
-run_config = Box2DConfig()
+run_config = ClassicControlConfig()

@@ -44,6 +44,8 @@ if __name__ == '__main__':
     torch.manual_seed(args.seed)
 
     # import corresponding configuration , neural networks and envs
+    if args.case == 'classic_control':
+        from config.classic_control import run_config
     if args.case == 'box2d':
         from config.box2d import run_config
     elif args.case == 'mujoco':
