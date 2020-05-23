@@ -9,7 +9,7 @@ class ClassicControlConfig(BaseConfig):
         super(ClassicControlConfig, self).__init__(max_env_steps=int(2e5),
                                                    start_step=int(2e3),
                                                    lr=1e-3,
-                                                   replay_memory_capacity=5e4,
+                                                   replay_memory_capacity=int(2e5),
                                                    fixed_action_repeat=1)
 
     def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
