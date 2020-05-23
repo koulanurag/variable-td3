@@ -139,7 +139,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
                     # epsilon-greedy repeat
                     repeat_q = model.critic_1(state, action)
                     if np.random.rand() <= epsilon:
-                        repeat_idx = np.random.randint(0, len(model.action_repeats) - 1)
+                        repeat_idx = np.random.randint(len(model.action_repeats))
                     else:
                         repeat_idx = repeat_q.argmax(1).item()
 
