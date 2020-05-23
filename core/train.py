@@ -75,8 +75,10 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
     # Update critic network
     critic_optimizer.zero_grad()
     q1_loss = (q1_loss.sum(dim=0) / next_state_mask_batch.sum(dim=0)).mean()
-    q2_loss = (q1_loss.sum(dim=0) / next_state_mask_batch.sum(dim=0)).mean()
+    q2_loss = (q2_loss.sum(dim=0) / next_state_mask_batch.sum(dim=0)).mean()
     (q1_loss + q2_loss).backward()
+    torch.nn.utils.clip_grad_norm_(model.critic_1.parameters(), config.grad_norm_clip)
+    torch.nn.utils.clip_grad_norm_(model.critic_2.parameters(), config.grad_norm_clip)
     critic_optimizer.step()
 
     # Compute Loss for Policy
@@ -89,6 +91,7 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
         critic_optimizer.zero_grad()
         policy_optimizer.zero_grad()
         policy_loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.actor.parameters(), config.grad_norm_clip)
         policy_optimizer.step()
 
     # Update target network
