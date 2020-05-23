@@ -14,13 +14,15 @@ from core.utils import init_logger, make_results_dir
 if __name__ == '__main__':
     # Lets gather arguments
     parser = argparse.ArgumentParser(description='TD3 with variable action repeat')
-    parser.add_argument('--env', required=True, help='Name of the environment')
+    parser.add_argument('--env', required=True,
+                        help='Name of the environment')
     parser.add_argument('--result_dir', default=os.path.join(os.getcwd(), 'results'),
                         help="Directory Path to store results (default: %(default)s)")
     parser.add_argument('--case', required=True, choices=['dm_control', 'mujoco', 'box2d', 'cassie'],
                         help="It's used for switching between different domains(default: %(default)s)")
     parser.add_argument('--opr', required=True, choices=['train', 'test'])
-    parser.add_argument('--no_cuda', action='store_true', default=False, help='no cuda usage (default: %(default)s)')
+    parser.add_argument('--no_cuda', action='store_true', default=False,
+                        help='no cuda usage (default: %(default)s)')
     parser.add_argument('--render', action='store_true', default=False,
                         help='Renders the environment (default: %(default)s)')
     parser.add_argument('--force', action='store_true', default=False,

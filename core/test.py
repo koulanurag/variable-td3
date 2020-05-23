@@ -4,6 +4,12 @@ import numpy as np
 import torch
 from .model import TD3Network
 from .env_wrapper import MultiStepWrapper
+from typing import NamedTuple
+
+
+class TestOutput(NamedTuple):
+    score: float
+    avg_repeat: float
 
 
 def _test(env: MultiStepWrapper, model: TD3Network, render: bool = False):
@@ -46,4 +52,4 @@ def test(env, model, episodes: int, device='cpu', render: bool = False, save_tes
 
     if save_test_data:
         pickle.dump((test_score, repeat_counts), open(save_path, 'wb'))
-    return np.array(test_score).mean(), np.mean([np.mean(x) for x in repeat_counts])
+    return TestOutput(np.array(test_score).mean(), np.mean([np.mean(x) for x in repeat_counts]))

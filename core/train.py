@@ -1,11 +1,10 @@
 import itertools
 import logging
-import random
 
 import numpy as np
 import torch
 from torch.distributions import Normal
-from torch.nn import L1Loss, MSELoss
+from torch.nn import MSELoss
 from torch.optim import Adam
 from torch.utils.tensorboard import SummaryWriter
 from torch.distributions import Categorical
@@ -60,8 +59,8 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
                 q2_next_target = target_model.critic_2(valid_next_state_batch, next_action)
                 min_q_next_target = torch.min(q1_next_target, q2_next_target)
                 max_q_repeat_target = min_q_next_target.max(dim=1)[0]
-                next_q_value = valid_reward_batch + \
-                               ((1 - valid_terminal_batch) * (config.gamma ** repeat_n) * max_q_repeat_target)
+                next_q_value = valid_reward_batch + ((1 - valid_terminal_batch) *
+                                                     (config.gamma ** repeat_n) * max_q_repeat_target)
 
             mse = MSELoss(reduction='none')
             q1_src = q1[:, repeat_i][next_state_mask_batch[:, repeat_i]]
@@ -224,15 +223,16 @@ def train(config: BaseConfig, writer: SummaryWriter):
         # Test
         if i_episode % config.test_interval == 0:
             test_model.load_state_dict(model.state_dict())
-            test_score, avg_action_repeats = test(env, test_model, config.test_episodes)
-            if test_score > best_test_score:
+            test_output = test(env, test_model, config.test_episodes)
+            if test_output.score > best_test_score:
                 torch.save(test_model.state_dict(), config.best_model_path)
 
             # Test Log
-            writer.add_scalar('test/score', test_score, total_env_steps)
-            writer.add_scalar('test/avg_action_repeats', avg_action_repeats, total_env_steps)
-            test_logger.info('#{} test score: {} avg_action_repeats:{}'.format(i_episode, test_score,
-                                                                               avg_action_repeats))
+            writer.add_scalar('test/score', test_output.score, total_env_steps)
+            writer.add_scalar('test/avg_action_repeats', test_output.avg_repeat, total_env_steps)
+            test_logger.info('#{} test score: {} avg_action_repeats:{}'.format(i_episode,
+                                                                               test_output.score,
+                                                                               test_output.avg_repeat))
         # save model
         if i_episode % config.save_model_freq == 0:
             torch.save(model.state_dict(), config.model_path)
