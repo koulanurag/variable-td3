@@ -74,8 +74,8 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
 
     # Update critic network
     critic_optimizer.zero_grad()
-    q1_loss = (q1_loss.sum(dim=1) / next_state_mask_batch.sum(dim=1)).mean()
-    q2_loss = (q2_loss.sum(dim=1) / next_state_mask_batch.sum(dim=1)).mean()
+    q1_loss = (q1_loss / next_state_mask_batch.sum(dim=0)).sum(dim=1).mean()
+    q2_loss = (q2_loss / next_state_mask_batch.sum(dim=0)).sum(dim=1).mean()
     (q1_loss + q2_loss).backward()
     critic_optimizer.step()
 
