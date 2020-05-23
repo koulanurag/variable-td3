@@ -48,7 +48,7 @@ if __name__ == '__main__':
     # import corresponding configuration , neural networks and envs
     if args.case == 'classic_control':
         from config.classic_control import run_config
-    if args.case == 'box2d':
+    elif args.case == 'box2d':
         from config.box2d import run_config
     elif args.case == 'mujoco':
         from config.mujoco import run_config
