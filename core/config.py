@@ -18,7 +18,7 @@ class BaseConfig(object):
                  tau: float = 0.005,
                  gamma: float = 0.99,
                  alpha: float = 0.2,
-                 max_epsilon: float = 1,
+                 max_epsilon: float = 0.25,
                  min_epsilon: float = 0.05,
                  policy_noise: float = 0.2,
                  noise_clip: float = 0.5,
