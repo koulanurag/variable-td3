@@ -24,7 +24,7 @@ class DmControlConfig(BaseConfig):
     def __init__(self):
         super(DmControlConfig, self).__init__()
 
-    def new_game(self, seed=None, save_video=False, save_path=None, video_callable=None, uid=None, eval=False):
+    def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
         env = gym.make('dm2gym:' + self.env_name, environment_kwargs={'flat_observation': True})
         env = DMControlWrapper(env)
 
@@ -33,7 +33,7 @@ class DmControlConfig(BaseConfig):
 
         if save_video:
             from gym.wrappers import Monitor
-            env = Monitor(env, directory=save_path, force=True, video_callable=video_callable, uid=uid)
+            env = Monitor(env, directory=video_dir_path, force=True, video_callable=lambda episode_id: True, uid=uid)
         return MultiStepWrapper(env)
 
 
