@@ -101,12 +101,13 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
 def train(config: BaseConfig, writer: SummaryWriter):
     memory = ReplayMemory(config.replay_memory_capacity)
 
-    # create networks & optimizer
+    # create networks
     model = config.get_uniform_network().to(config.device)
     target_model = config.get_uniform_network().to(config.device)
     target_model.load_state_dict(model.state_dict())
     test_model = config.get_uniform_network().to(config.device)
 
+    # create optimizers
     critic_optimizer = Adam([{'params': model.critic_1.parameters()},
                              {'params': model.critic_2.parameters()}], lr=config.lr)
     policy_optimizer = Adam(model.actor.parameters(), lr=config.lr)
@@ -138,10 +139,10 @@ def train(config: BaseConfig, writer: SummaryWriter):
                     action = config.clip_action(action)
 
                     # epsilon-greedy repeat
-                    repeat_q = model.critic_1(state, action)
                     if np.random.rand() <= epsilon:
                         repeat_idx = np.random.randint(len(model.action_repeats))
                     else:
+                        repeat_q = model.critic_1(state, action)
                         repeat_idx = repeat_q.argmax(1).item()
 
                 state = state.data.cpu().numpy()[0]
@@ -156,8 +157,6 @@ def train(config: BaseConfig, writer: SummaryWriter):
             for repeat_i in range(1, repeat_n + 1):
                 next_state, reward, done, info = env.step(action)
                 discounted_reward_sum += (config.gamma ** repeat_i) * reward
-                episode_steps += 1
-                total_env_steps += 1
                 episode_reward += reward
                 step += 1
 
@@ -172,8 +171,12 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 if done:
                     break
 
+            # incr counters
+            episode_steps += step
+            total_env_steps += step
+
             # add random data to be masked during batch processing.
-            next_state_mask = [1 for _ in range(len(next_states) - 1)] + [1]
+            next_state_mask = [1 for _ in range(len(next_states))]
             if len(next_states) < len(model.action_repeats):
                 next_state_mask += [0 for _ in range(len(model.action_repeats) - len(next_state_mask))]
 
@@ -200,14 +203,10 @@ def train(config: BaseConfig, writer: SummaryWriter):
 
                     updates += 1
 
-                critic_1_loss /= update_count
-                critic_2_loss /= update_count
-                policy_loss /= update_count
-
                 # Log
-                writer.add_scalar('train/critic_1_loss', critic_1_loss, total_env_steps)
-                writer.add_scalar('train/critic_2_loss', critic_2_loss, total_env_steps)
-                writer.add_scalar('train/policy_loss', policy_loss, total_env_steps)
+                writer.add_scalar('train/critic_1_loss', critic_1_loss / update_count, total_env_steps)
+                writer.add_scalar('train/critic_2_loss', critic_2_loss / update_count, total_env_steps)
+                writer.add_scalar('train/policy_loss', policy_loss / update_count, total_env_steps)
 
         # log episode data
         writer.add_scalar('data/eps_reward', episode_reward, total_env_steps)
@@ -216,8 +215,6 @@ def train(config: BaseConfig, writer: SummaryWriter):
         writer.add_scalar('data/episodes', i_episode, total_env_steps)
         writer.add_scalar('data/epsilon', epsilon, total_env_steps)
         writer.add_scalar('train/updates', updates, total_env_steps)
-        for name, W in model.named_parameters():
-            writer.add_histogram('network_weights' + '/' + name, W.data.cpu().numpy(), total_env_steps)
 
         _msg = '#{} train score:{} eps steps: {} total steps: {} updates : {}'
         _msg = _msg.format(i_episode, round(episode_reward, 2), episode_steps, total_env_steps, updates)
