@@ -78,5 +78,5 @@ class TD3Network(nn.Module):
         super(TD3Network, self).__init__()
         self.action_repeats = action_repeats
         self.actor = ActorNetwork(num_inputs, num_actions, hidden_dim, action_space)
-        self.critic_1 = MultiQNetwork(num_inputs, num_actions, len(action_repeats), hidden_dim)
-        self.critic_2 = MultiQNetwork(num_inputs, num_actions, len(action_repeats), hidden_dim)
+        self.critic_1 = QNetwork(num_inputs, num_actions, len(action_repeats), hidden_dim)
+        self.critic_2 = QNetwork(num_inputs, num_actions, len(action_repeats), hidden_dim)
