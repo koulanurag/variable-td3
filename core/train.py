@@ -68,13 +68,11 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
             q2_src = q2[:, repeat_i][next_state_mask_batch[:, repeat_i]]
             q2_loss[:, repeat_i][next_state_mask_batch[:, repeat_i]] = mse(q2_src, next_q_value)
 
-            if repeat_i == 0:
-                writer.add_histogram('next_q_value', next_q_value, updates)
-                writer.add_histogram('q1', q1_src, updates)
-
-    # Update critic network
+    # normalize critic loss
     q1_loss = (q1_loss.sum(dim=0) / next_state_mask_batch.sum(dim=0)).mean()
     q2_loss = (q2_loss.sum(dim=0) / next_state_mask_batch.sum(dim=0)).mean()
+
+    # update critic networks
     critic_optimizer.zero_grad()
     (q1_loss + q2_loss).backward()
     torch.nn.utils.clip_grad_norm_(model.critic_1.parameters(), config.grad_norm_clip)
