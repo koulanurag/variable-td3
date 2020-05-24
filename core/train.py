@@ -69,8 +69,8 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
             q2_loss[:, repeat_i][next_state_mask_batch[:, repeat_i]] = mse(q2_src, next_q_value)
 
     # normalize critic loss
-    q1_loss = (q1_loss.sum(dim=0) / next_state_mask_batch.sum(dim=0)).mean()
-    q2_loss = (q2_loss.sum(dim=0) / next_state_mask_batch.sum(dim=0)).mean()
+    q1_loss = (q1_loss.sum(dim=0) / (next_state_mask_batch.sum(dim=0) + 1e-5)).sum()
+    q2_loss = (q2_loss.sum(dim=0) / (next_state_mask_batch.sum(dim=0) + 1e-5)).sum()
 
     # update critic networks
     critic_optimizer.zero_grad()
