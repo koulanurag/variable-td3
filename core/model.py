@@ -32,23 +32,6 @@ class QNetwork(nn.Module):
         return x1
 
 
-class MultiQNetwork(nn.Module):
-    def __init__(self, num_inputs, num_actions, num_action_repeats, hidden_dim):
-        super(MultiQNetwork, self).__init__()
-        self.num_action_repeats = num_action_repeats
-        for repeat_i in range(num_action_repeats):
-            model = QNetwork(num_inputs, num_actions, 1, hidden_dim)
-            setattr(self, 'q_{}'.format(repeat_i), model)
-
-    def forward(self, state, action):
-        qs = []
-        for repeat_i in range(self.num_action_repeats):
-            repeat_i_q_val = getattr(self, 'q_{}'.format(repeat_i))(state, action)
-            qs.append(repeat_i_q_val)
-
-        return torch.cat(qs, dim=1)
-
-
 class ActorNetwork(nn.Module):
     def __init__(self, state_dim, num_actions, hidden_dim, action_space):
         super(ActorNetwork, self).__init__()
