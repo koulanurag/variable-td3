@@ -73,9 +73,9 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
                 writer.add_histogram('q1', q1_src, updates)
 
     # Update critic network
-    critic_optimizer.zero_grad()
     q1_loss = (q1_loss.sum(dim=0) / next_state_mask_batch.sum(dim=0)).mean()
     q2_loss = (q2_loss.sum(dim=0) / next_state_mask_batch.sum(dim=0)).mean()
+    critic_optimizer.zero_grad()
     (q1_loss + q2_loss).backward()
     torch.nn.utils.clip_grad_norm_(model.critic_1.parameters(), config.grad_norm_clip)
     torch.nn.utils.clip_grad_norm_(model.critic_2.parameters(), config.grad_norm_clip)

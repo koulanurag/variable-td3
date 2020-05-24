@@ -28,7 +28,7 @@ class BaseConfig(object):
                  replay_memory_capacity: int = 1e6,
                  action_repeat_set: List[int] = [2, 4, 8, 16],
                  fixed_action_repeat=2,
-                 test_episodes=2):
+                 test_episodes=5):
 
         # training
         self.max_env_steps = max_env_steps
