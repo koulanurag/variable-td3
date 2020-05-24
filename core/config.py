@@ -26,7 +26,7 @@ class BaseConfig(object):
                  policy_delay: int = 2,
                  save_model_freq: int = 50,
                  replay_memory_capacity: int = 1e6,
-                 action_repeat_set: List[int] = [2, 4, 8, 16],
+                 action_repeat_set: List[int] = [1,2],
                  fixed_action_repeat=2,
                  test_episodes=5):
 
