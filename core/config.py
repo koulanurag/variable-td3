@@ -18,15 +18,15 @@ class BaseConfig(object):
                  tau: float = 0.005,
                  gamma: float = 0.99,
                  alpha: float = 0.2,
-                 max_epsilon: float = 0.1,
-                 min_epsilon: float = 0.05,
+                 max_epsilon: float = 0.5,
+                 min_epsilon: float = 0.1,
                  policy_noise: float = 0.2,
                  noise_clip: float = 0.5,
                  grad_norm_clip: float = 40,
                  policy_delay: int = 2,
                  save_model_freq: int = 50,
                  replay_memory_capacity: int = 1e6,
-                 action_repeat_set: List[int] = [2, 4, 8, 16],
+                 action_repeat_set: List[int] = [2, 4, 8, 16, 32],
                  fixed_action_repeat=2,
                  test_episodes=5):
 
