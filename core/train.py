@@ -21,7 +21,7 @@ def soft_update(target, source, tau):
         target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
 
 
-def update_params(model, target_model, critic_optimizer, policy_optimizer, memory, updates, config, writer):
+def update_params(model, target_model, critic_optimizer, policy_optimizer, memory, updates, config):
     # Sample a batch from memory
     batch: BatchOutput = memory.sample(batch_size=config.batch_size)
 
@@ -193,7 +193,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 update_count = config.updates_per_step * step
                 for i in range(update_count):
                     loss = update_params(model, target_model, critic_optimizer,
-                                         policy_optimizer, memory, updates, config, writer)
+                                         policy_optimizer, memory, updates, config)
                     critic_1_loss += loss[0]
                     critic_2_loss += loss[1]
                     policy_loss += loss[2]
