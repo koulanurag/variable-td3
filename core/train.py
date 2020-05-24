@@ -172,8 +172,6 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 if done:
                     break
 
-            state = next_states[-1]
-
             # add random data to be masked during batch processing.
             next_state_mask = [1 for _ in range(len(next_states) - 1)] + [1]
             if len(next_states) < len(model.action_repeats):
@@ -187,6 +185,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
 
             # Add to memory
             memory.push(state, action, rewards, next_states, next_state_mask, terminals)
+            state = next_state
 
             # update network
             if len(memory) > config.batch_size:
