@@ -154,9 +154,9 @@ def _plot(scalars_info, save_dir, column_size=3):
     for i in action_repeat_fig['layout']['annotations']:
         i['font']['size'] = 12
     test_fig.update_layout(showlegend=True, template='seaborn', legend_orientation='h',
-                           legend=dict(x=0.25, y=-0.25))
+                           legend=dict(x=0.25, y=-0.25), margin=dict(l=20, r=20, b=0, t=40, pad=0), )
     action_repeat_fig.update_layout(showlegend=True, legend_orientation='h', template='seaborn',
-                                    legend=dict(x=0.25, y=-0.25))
+                                    legend=dict(x=0.25, y=-0.25), margin=dict(l=20, r=20, b=0, t=40, pad=0), )
 
     # save plot as image
     test_img_path = os.path.join(save_dir, 'test_summary.png')
