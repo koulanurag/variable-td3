@@ -28,6 +28,7 @@ class BaseConfig(object):
                  replay_memory_capacity: int = 1e6,
                  action_repeat_set: List[int] = [2, 4, 8, 16, 32],
                  fixed_action_repeat=2,
+                 test_interval_steps=5000,
                  test_episodes=5):
 
         # training
@@ -56,7 +57,7 @@ class BaseConfig(object):
         self.max_epsilon = max_epsilon
 
         # test
-        self.test_interval = 10
+        self.test_interval_steps = test_interval_steps
 
         # action info
         self.action_repeat_set = action_repeat_set

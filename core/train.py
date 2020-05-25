@@ -158,8 +158,13 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 next_state, reward, done, info = env.step(action)
                 discounted_reward_sum += (config.gamma ** repeat_i) * reward
                 episode_reward += reward
-                step += 1
 
+                # incr counters
+                step += 1
+                episode_steps += 1
+                total_env_steps += 1
+
+                # save data for each sub-repeat count
                 if (repeat_i in model.action_repeats) or done:
                     next_states.append(next_state)
                     rewards.append(discounted_reward_sum)
@@ -168,12 +173,23 @@ def train(config: BaseConfig, writer: SummaryWriter):
                     terminal = 0 if (('TimeLimit.truncated' in info) and info['TimeLimit.truncated']) else float(done)
                     terminals.append(terminal)
 
+                # Test
+                # Note : This is kept inside this for loop to keep test intervals sync. across multiple seeds.
+                if total_env_steps % config.test_interval_steps == 0:
+                    test_model.load_state_dict(model.state_dict())
+                    test_output = test(env, test_model, config.test_episodes)
+                    if test_output.score > best_test_score:
+                        torch.save(test_model.state_dict(), config.best_model_path)
+
+                    # Test Log
+                    writer.add_scalar('test/score', test_output.score, total_env_steps)
+                    writer.add_scalar('test/avg_action_repeats', test_output.avg_repeat, total_env_steps)
+                    test_logger.info('#{} test score: {} avg_action_repeats:{}'.format(total_env_steps,
+                                                                                       test_output.score,
+                                                                                       test_output.avg_repeat))
+
                 if done:
                     break
-
-            # incr counters
-            episode_steps += step
-            total_env_steps += step
 
             # add random data to be masked during batch processing.
             next_state_mask = [1 for _ in range(len(next_states))]
@@ -220,19 +236,6 @@ def train(config: BaseConfig, writer: SummaryWriter):
         _msg = _msg.format(i_episode, round(episode_reward, 2), episode_steps, total_env_steps, updates)
         train_logger.info(_msg)
 
-        # Test
-        if i_episode % config.test_interval == 0:
-            test_model.load_state_dict(model.state_dict())
-            test_output = test(env, test_model, config.test_episodes)
-            if test_output.score > best_test_score:
-                torch.save(test_model.state_dict(), config.best_model_path)
-
-            # Test Log
-            writer.add_scalar('test/score', test_output.score, total_env_steps)
-            writer.add_scalar('test/avg_action_repeats', test_output.avg_repeat, total_env_steps)
-            test_logger.info('#{} test score: {} avg_action_repeats:{}'.format(i_episode,
-                                                                               test_output.score,
-                                                                               test_output.avg_repeat))
         # save model
         if i_episode % config.save_model_freq == 0:
             torch.save(model.state_dict(), config.model_path)
