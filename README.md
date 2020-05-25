@@ -5,4 +5,11 @@
 
 ## Usage
 
-```python main.py --case box2d --env LunarLanderContinuous-v2 --opr train```
+```$ python main.py --case classic_control --env Pendulum-v0 --opr train```
+
+## Plotting:
+```bash
+$ cd scripts
+$ python summary_graphs.py --logdir=../results/classic_control --opr extract_summary 
+$ python summary_graphs.py --logdir=../results/classic_control --opr plot
+```
