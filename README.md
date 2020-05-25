@@ -25,7 +25,7 @@
 	<td>Name of the environment</td>
 </tr>
 <tr>
-	<td rowspan="4"> <i>--case {atari,classic_control,box2d}</i> </td>
+	<td rowspan="4"> <i>--case {classic_control,box2d,mujoco}</i> </td>
 	<td>It's used for switching between different domains(and configs).<br> <br>Environments corresponding to each case:</td>
 </tr>
 <tr>
