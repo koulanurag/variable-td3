@@ -73,7 +73,7 @@ def extract_summaries(logdir: str):
             y = [s.value for s in acc.Scalars(AVG_ACTION_REPEAT_TAG['ref'])]
             dest['avg_action_repeat']['seed'][seed] = {'x': x, 'y': y}
 
-            print('Processed {}, seed:{} , mode:{} repeat: {}'.format(game_name, seed, repeat_mode, repeat_count))
+            print('Processed {}, seed:{} , mode:{} , repeat: {}'.format(game_name, seed, repeat_mode, repeat_count))
 
     return scalars_info
 
