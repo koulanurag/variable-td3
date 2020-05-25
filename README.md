@@ -13,33 +13,8 @@
     $ python summary_graphs.py --logdir=../results/classic_control --opr extract_summary 
     $ python summary_graphs.py --logdir=../results/classic_control --opr plot
     ```
-
-<table>
-<thead>
-<th >Required Arguments</th>
-<th >Description</th>
-</thead>
-<tbody>
-<tr>
-	<td> <i>--env</i> </td>
-	<td>Name of the environment</td>
-</tr>
-<tr>
-	<td rowspan="4"> <i>--case {classic_control,box2d,mujoco}</i> </td>
-	<td>It's used for switching between different domains(and configs).<br> <br>Environments corresponding to each case:</td>
-</tr>
-<tr>
-	<td><i>classic_control : {Pendulum-v0, MountainCarContinuous-v0}</td>
-</tr>
-<tr>
-	<td><i>box2d : {LunarLanderContinuous-v2, BipedalWalker-v3, BipedalWalkerHardcore-v3} </i></td>
-</tr>
-<tr>
-	<td><i><a href="https://gym.openai.com/envs/#mujoco(https://gym.openai.com/envs/#mujoco)">mujoco</a></i></td>
-</tr>
-<tr>
-	<td> <i>--opr {train,test}</i> </td>
-	<td>operation to be performed</td>
-</tr>
-</tbody>
-</table>
+|Required Arguments | Description|  
+|:-------------|:-------------|  
+| `--env`                          |Name of the environment|  
+| `--case {classic_control,box2d,mujoco}` |It's used for switching between different domains(and configs) <br><br> Environments corresponding to ease case: <br> # classic_control : {Pendulum-v0, MountainCarContinuous-v0} <br><br> # box2d : {LunarLanderContinuous-v2, BipedalWalker-v3, BipedalWalkerHardcore-v3} <br><br> # mujoco: [(refer here)](https://gym.openai.com/envs/#mujoco)|  
+| `--opr {train,test}` |select the operation to be performed|
