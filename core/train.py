@@ -116,6 +116,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
     updates = 0
     best_test_score = float('-inf')
     env = config.new_game(seed=config.seed)
+    test_env = config.new_game(seed=config.seed + 100)
 
     for i_episode in itertools.count(1):
 
@@ -177,7 +178,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 # Note : This is kept inside this for loop to keep test intervals sync. across multiple seeds.
                 if total_env_steps % config.test_interval_steps == 0:
                     test_model.load_state_dict(model.state_dict())
-                    test_output = test(env, test_model, config.test_episodes)
+                    test_output = test(test_env, test_model, config.test_episodes)
                     if test_output.score > best_test_score:
                         torch.save(test_model.state_dict(), config.best_model_path)
 

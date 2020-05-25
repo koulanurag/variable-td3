@@ -10,7 +10,8 @@ class ClassicControlConfig(BaseConfig):
                                                    start_step=int(2e3),
                                                    lr=1e-3,
                                                    replay_memory_capacity=int(2e5),
-                                                   fixed_action_repeat=1)
+                                                   fixed_action_repeat=1,
+                                                   test_interval_steps=2000)
 
     def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
         env = gym.make(self.env_name)

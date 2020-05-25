@@ -10,7 +10,8 @@ class MujocoConfig(BaseConfig):
                                            start_step=int(25e3),
                                            lr=3e-4,
                                            replay_memory_capacity=int(1e6),
-                                           fixed_action_repeat=1)
+                                           fixed_action_repeat=1,
+                                           test_interval_steps=5000)
 
     def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
         env = gym.make(self.env_name)

@@ -10,7 +10,8 @@ class Box2DConfig(BaseConfig):
                                           start_step=int(5e3),
                                           lr=1e-3,
                                           replay_memory_capacity=int(1e5),
-                                          fixed_action_repeat=1)
+                                          fixed_action_repeat=1,
+                                          test_interval_steps=5000)
 
     def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
         env = gym.make(self.env_name)
