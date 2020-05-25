@@ -27,7 +27,7 @@ SINGLE_GRAPH_WIDTH, SINGLE_GRAPH_HEIGHT = 350, 350
 
 
 def extract_summaries(logdir: str):
-    """ re-draw the tf summary events plots  using plotly
+    """ extracts and pickles only relevant scalars
 
     :param logdir: Path to the directory having event logs
     """
@@ -79,6 +79,8 @@ def extract_summaries(logdir: str):
 
 
 def _plot(scalars_info, save_dir, column_size=3):
+    """ Plots scalars using plotly. """
+
     # Note: Refer here for color names : https://www.w3schools.com/cssref/css_colors.asp
     candidate_colors = ['coral', 'orchid', 'palegreen', 'yellow', 'thistle',
                         'turquoise', 'chartreuse', 'darkcyan', 'darkmagenta']
