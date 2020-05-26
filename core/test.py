@@ -40,7 +40,8 @@ def _test(env: MultiStepWrapper, model: TD3Network, render: bool = False):
     return episode_reward, action_repeats
 
 
-def test(env, model, episodes: int, device='cpu', render: bool = False, save_test_data: bool = False, save_path=None):
+def test(env: MultiStepWrapper, model: TD3Network, episodes: int, device='cpu',
+         render: bool = False, save_test_data: bool = False, save_path=None):
     model.to(device)
     model.eval()
 

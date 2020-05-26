@@ -33,12 +33,12 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
     reward_batch = torch.FloatTensor(batch.reward).to(config.device)
     terminal_batch = torch.FloatTensor(batch.terminal).to(config.device)
 
-    # Compute Loss for  Q_values
+    # Compute Predicted Q_values
     q1 = model.critic_1(state_batch, action_batch)
     q2 = model.critic_2(state_batch, action_batch)
-    q1_loss, q2_loss = torch.zeros(reward_batch.shape), torch.zeros(reward_batch.shape)
 
-    # Compute Targets for Q values
+    # Compute Targets Q values & Q Losses
+    q1_loss, q2_loss = torch.zeros(reward_batch.shape), torch.zeros(reward_batch.shape)
     for repeat_i in range(len(model.action_repeats)):
         valid_next_state_batch = next_state_batch[:, repeat_i][next_state_mask_batch[:, repeat_i]]
         valid_reward_batch = reward_batch[:, repeat_i][next_state_mask_batch[:, repeat_i]]
@@ -112,14 +112,17 @@ def train(config: BaseConfig, writer: SummaryWriter):
                              {'params': model.critic_2.parameters()}], lr=config.lr)
     policy_optimizer = Adam(model.actor.parameters(), lr=config.lr)
 
-    total_env_steps = 0
-    updates = 0
-    best_test_score = float('-inf')
+    # create envs
     env = config.new_game(seed=config.seed)
     test_env = config.new_game(seed=config.seed + 100)
 
-    for i_episode in itertools.count(1):
+    # training trackers
+    total_env_steps = 0
+    updates = 0
+    best_test_score = float('-inf')
 
+    # Fire!!
+    for i_episode in itertools.count(1):
         done = False
         episode_steps, episode_reward, epsiode_repeats = 0, 0, []
 
@@ -175,7 +178,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
                     terminals.append(terminal)
 
                 # Test
-                # Note : This is kept inside this for loop to keep test intervals sync. across multiple seeds.
+                # Note : This is kept inside env step for-loop to keep test intervals sync. across multiple seeds.
                 if total_env_steps % config.test_interval_steps == 0:
                     test_model.load_state_dict(model.state_dict())
                     test_output = test(test_env, test_model, config.test_episodes)
