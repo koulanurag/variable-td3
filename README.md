@@ -1,4 +1,5 @@
 # pytorch-variable-td3
+<a href="https://docs.google.com/presentation/d/1TKRy9va3qgIlia7pjdZkcLV9ht9bjQkUUcND4byrARg/edit?usp=sharing"><img src="https://legismusic.com/wp-content/uploads/2019/04/Google-Slides.png" width="100px" height="100px"/></a>
 
 ## Installation
 ```conda env create -f environment.yml```
