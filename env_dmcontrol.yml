@@ -1,0 +1,13 @@
+name: td3_dmcontrol
+channels:
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.7
+  - pytorch=1.5.0
+  - pip:
+    - dm-control
+    - dm2gym==0.2.0
+    - opencv-python==4.2.0.34
+    - tensorboard==2.2.1
+    - wandb==0.8.35

@@ -2,7 +2,10 @@
 <a target="_blank" href="https://docs.google.com/presentation/d/1TKRy9va3qgIlia7pjdZkcLV9ht9bjQkUUcND4byrARg/edit?usp=sharing"><img src="https://legismusic.com/wp-content/uploads/2019/04/Google-Slides.png" width="100px" height="100px"/></a>
 
 ## Installation
-```conda env create -f environment.yml```
+1. For classic tasks and gym mujcoco , do following:
+    ```conda env create -f  env.yml```
+2. For dm_control, create a seperate conda env.:
+    ```conda env create -f env_dmcontrol.yml```
 
 ## Usage
 - Train: ```$ python main.py --case classic_control --env Pendulum-v0 --opr train```
