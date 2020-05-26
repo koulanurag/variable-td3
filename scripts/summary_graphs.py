@@ -146,7 +146,6 @@ def _plot(scalars_info, save_dir, column_size=3):
                                          name=trace_name,
                                          fill='tonexty',
                                          showlegend=False,
-
                                          line=dict(color=mode_color, width=0.1)),
                               row=row, col=col)
 
