@@ -6,7 +6,12 @@ from core.env_wrapper import MultiStepWrapper
 
 class CassieConfig(BaseConfig):
     def __init__(self):
-        super(CassieConfig, self).__init__()
+        super(CassieConfig, self).__init__(max_env_steps=int(2e5),
+                                           start_step=int(1e4),
+                                           lr=1e-3,
+                                           replay_memory_capacity=int(2e5),
+                                           fixed_action_repeat=1,
+                                           test_interval_steps=2000)
 
     def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
         env = self.env_factory(self.env_name)

@@ -1,11 +1,22 @@
 import logging
 import os
 import shutil
+import torch
 
 
 def get_epsilon(max_eps, min_eps, curr_steps, max_steps):
     epsilon = max(min_eps, max_eps - (max_eps - min_eps) * curr_steps / (0.5 * max_steps))
     return epsilon
+
+
+def clip_action(self, action, action_space):
+    assert len(action.shape) == 2, 'Expected batch of actions'
+    clamped_action = [torch.clamp(action[:, a_i].unsqueeze(1),
+                                  self.action_space.low[a_i],
+                                  self.action_space.high[a_i])
+                      for a_i in range(action.shape[1])]
+    action = torch.cat(clamped_action, dim=1)
+    return action
 
 
 def make_results_dir(exp_path, args):
