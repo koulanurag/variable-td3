@@ -1,6 +1,6 @@
 # pytorch-variable-td3
-<a target="_blank" href="https://docs.google.com/presentation/d/1TKRy9va3qgIlia7pjdZkcLV9ht9bjQkUUcND4byrARg/edit?usp=sharing"><img src="https://legismusic.com/wp-content/uploads/2019/04/Google-Slides.png" width="100px" height="100px"/></a>
-<a target="_blank" href="https://www.overleaf.com/project/5eccded67908040001d77a7e"><img src="https://ftp.riken.jp/tex-archive/info/guide-latex-fr/Images/overleaf.png" width="80px" height="80px"/></a>
+<a target="_blank" href="https://docs.google.com/presentation/d/1TKRy9va3qgIlia7pjdZkcLV9ht9bjQkUUcND4byrARg/edit?usp=sharing"><img src="https://legismusic.com/wp-content/uploads/2019/04/Google-Slides.png" width="80px" height="80px"/></a>
+<a target="_blank" href="https://www.overleaf.com/project/5eccded67908040001d77a7e"><img src="https://images.ctfassets.net/nrgyaltdicpt/6gsvc5Ogjmu04I4Miu0uGg/cb1d4391717d2ab8d5e42ede6fb0eef1/overleaf_wide_colour_light_bg.png" width="150px" height="65px"/></a>
 
 
 ## Installation
