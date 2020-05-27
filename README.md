@@ -4,14 +4,15 @@
 ## Installation
 1. For classic tasks and gym mujcoco , do following:
     ```bash
-    conda env create -f  env.yml
+    conda env create -f  env.yml # creates env with name "pytorch-variable-td3"
     ```
 2. For dm_control, create a seperate conda env.:
     ```bash
-    conda env create -f env_dmcontrol.yml
+    conda env create -f env_dmcontrol.yml # creates env with name "td3_dmcontrol"
     ```
 
 ## Usage
+- ```$ conda activate <env_name>```
 - Train: ```$ python main.py --case classic_control --env Pendulum-v0 --opr train```
 - Test: ```$ python main.py --case classic_control --env Pendulum-v0 --opr test```
 
@@ -28,4 +29,3 @@
     $ python summary_graphs.py --logdir=../results/classic_control --opr extract_summary 
     $ python summary_graphs.py --logdir=../results/classic_control --opr plot
     ```
-  
