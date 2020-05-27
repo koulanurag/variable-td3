@@ -18,8 +18,8 @@
 
     |Required Arguments | Description|  
     |:-------------|:-------------|  
-    | `--env`                          |Name of the environment|  
-    | `--case {classic_control,box2d,mujoco}` |It's used for switching between different domains(and configs) <br><br> Environments corresponding to ease case: <br> `classic_control` : {Pendulum-v0, MountainCarContinuous-v0} <br> `box2d` : _{LunarLanderContinuous-v2, BipedalWalker-v3, BipedalWalkerHardcore-v3}_ <br>`mujoco`: _[(refer here)](https://gym.openai.com/envs/#mujoco)_|  
+    | `--case {classic_control,box2d,mujoco}`                          |It's used for switching between different domains(and configs)|  
+    | `--env` |Name of the environment <br><br> Environments corresponding to ease case: <br> `classic_control` : {Pendulum-v0, MountainCarContinuous-v0} <br> `box2d` : _{LunarLanderContinuous-v2, BipedalWalker-v3, BipedalWalkerHardcore-v3}_ <br>`mujoco`: _[(refer here)](https://gym.openai.com/envs/#mujoco)_|  
     | `--opr {train,test}` |select the operation to be performed|
 
 - Visualize Results: ```tensorboard --logdir=./results```
