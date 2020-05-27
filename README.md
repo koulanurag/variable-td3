@@ -1,6 +1,6 @@
 # pytorch-variable-td3
-<a target="_blank" href="https://docs.google.com/presentation/d/1TKRy9va3qgIlia7pjdZkcLV9ht9bjQkUUcND4byrARg/edit?usp=sharing"><img src="https://legismusic.com/wp-content/uploads/2019/04/Google-Slides.png" width="80px" height="80px"/></a>
-<a target="_blank" href="https://www.overleaf.com/project/5eccded67908040001d77a7e"><img src="https://images.ctfassets.net/nrgyaltdicpt/6qSXAo1CYEeBn5RkKLOR64/19c74bfb9a32772e353ff25c6f0070f5/ologo_square_colour_light_bg.png" width="80px" height="80px"/></a>
+<a target="_blank" href="https://docs.google.com/presentation/d/1TKRy9va3qgIlia7pjdZkcLV9ht9bjQkUUcND4byrARg/edit?usp=sharing"><img src="https://lh3.ggpht.com/9rwhkrvgiLhXVBeKtScn1jlenYk-4k3Wyqt1PsbUr9jhGew0Gt1w9xbwO4oePPd5yOM=w300" width="65px" height="65px"/></a>
+<a target="_blank" href="https://www.overleaf.com/project/5eccded67908040001d77a7e"><img src="https://images.ctfassets.net/nrgyaltdicpt/6qSXAo1CYEeBn5RkKLOR64/19c74bfb9a32772e353ff25c6f0070f5/ologo_square_colour_light_bg.png" width="70px" height="70px"/></a>
 
 
 ## Installation
