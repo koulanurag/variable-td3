@@ -1,4 +1,4 @@
-name: td3_dmcontrol
+name: vtd3_mj2
 channels:
   - pytorch
   - defaults

@@ -4,17 +4,14 @@
 |:-------------:|:-------------:|
 |Slide| Overleaf|
 
-
-
-
 ## Installation
 1. For classic tasks and gym mujcoco , do following:
     ```bash
-    conda env create -f  env.yml # creates env with name "pytorch-variable-td3"
+    conda env create -f  env.yml # creates env(having mujoco 1.5) with name "vtd3"
     ```
-2. For dm_control, create a seperate conda env.:
+2. For dm_contro & cassie, create a separate conda env. having mujoco 2.0 :
     ```bash
-    conda env create -f env_dmcontrol.yml # creates env with name "td3_dmcontrol"
+    conda env create -f env_mj2.yml # creates env with name "vtd3_mj2"
     ```
 
 ## Usage
