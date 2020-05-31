@@ -125,7 +125,7 @@ class BaseConfig(object):
             self.reward_scale_factor = self.fixed_action_repeat
             self.exp_path = os.path.join(self.exp_path, 'fixed', 'action_repeat_{}'.format(self.fixed_action_repeat))
         elif self.action_repeat_mode == 'variable':
-            self.reward_scale_factor = np.mean(self.action_repeat_set)
+            self.reward_scale_factor = sum(self.action_repeat_set) / len(self.action_repeat_set)
             self.exp_path = os.path.join(self.exp_path, 'variable')
         else:
             raise AttributeError('action_repeat_mode : {} is not valid'.format(self.action_repeat_mode))
