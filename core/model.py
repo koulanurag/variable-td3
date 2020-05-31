@@ -63,3 +63,7 @@ class TD3Network(nn.Module):
         self.actor = ActorNetwork(num_inputs, num_actions, hidden_dim, action_space)
         self.critic_1 = QNetwork(num_inputs, num_actions, len(action_repeats), hidden_dim)
         self.critic_2 = QNetwork(num_inputs, num_actions, len(action_repeats), hidden_dim)
+
+    def to(self, device):
+        self.actor.to(device)
+        return super(TD3Network, self).to(device)
