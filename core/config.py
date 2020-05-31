@@ -52,6 +52,9 @@ class BaseConfig(object):
         self.policy_delay = policy_delay
         self.test_episodes = test_episodes
 
+        # reward normalization
+        self.reward_scale_factor = None
+
         # exploration
         self.min_epsilon = min_epsilon
         self.max_epsilon = max_epsilon
@@ -119,8 +122,10 @@ class BaseConfig(object):
 
         # action repeat mode
         if self.action_repeat_mode == 'fixed':
+            self.reward_scale_factor = self.fixed_action_repeat
             self.exp_path = os.path.join(self.exp_path, 'fixed', 'action_repeat_{}'.format(self.fixed_action_repeat))
         elif self.action_repeat_mode == 'variable':
+            self.reward_scale_factor = np.mean(self.action_repeat_set)
             self.exp_path = os.path.join(self.exp_path, 'variable')
         else:
             raise AttributeError('action_repeat_mode : {} is not valid'.format(self.action_repeat_mode))

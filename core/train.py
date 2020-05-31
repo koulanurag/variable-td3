@@ -160,7 +160,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
             next_states, rewards, terminals = [], [], []
             for repeat_i in range(1, repeat_n + 1):
                 next_state, reward, done, info = env.step(action)
-                discounted_reward_sum += (config.gamma ** repeat_i) * reward
+                discounted_reward_sum += (config.gamma ** repeat_i) * (reward / config.reward_scale_factor)
                 episode_reward += reward
 
                 # incr counters
