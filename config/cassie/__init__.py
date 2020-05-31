@@ -19,6 +19,8 @@ class CassieConfig(BaseConfig):
         env.action_space = Box(low=-1.0, high=1.0, shape=(10,), dtype=np.float32)
         env.observation_space = Box(low=-1.0, high=1.0, shape=(42,), dtype=np.float32)
         env.reward_range = None
+        env.metadata = {'render.modes': ['human', 'rgb_array'],
+                        'video.frames_per_second': 50}
         return MultiStepWrapper(env)
 
     @staticmethod
