@@ -18,6 +18,7 @@ class CassieConfig(BaseConfig):
         env = self.env_factory(self.env_name)
         env.action_space = Box(low=-1.0, high=1.0, shape=(10,), dtype=np.float32)
         env.observation_space = Box(low=-1.0, high=1.0, shape=(42,), dtype=np.float32)
+        env.reward_range = None
         return MultiStepWrapper(env)
 
     @staticmethod
