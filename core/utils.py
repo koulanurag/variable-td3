@@ -2,7 +2,7 @@ import logging
 import os
 import shutil
 import torch
-from gym import Spaces
+from gym.spaces import Space
 
 
 def get_epsilon(max_eps: float, min_eps: float, curr_steps: int, max_steps: int):
@@ -10,7 +10,7 @@ def get_epsilon(max_eps: float, min_eps: float, curr_steps: int, max_steps: int)
     return epsilon
 
 
-def clip_action(action, action_space: Spaces):
+def clip_action(action, action_space: Space):
     assert len(action.shape) == 2, 'Expected batch of actions'
     clamped_action = [torch.clamp(action[:, a_i].unsqueeze(1),
                                   action_space.low[a_i],
