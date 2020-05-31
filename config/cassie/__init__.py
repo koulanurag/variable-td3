@@ -21,7 +21,7 @@ class CassieConfig(BaseConfig):
         env.reward_range = None
         env.metadata = {'render.modes': ['human', 'rgb_array'],
                         'video.frames_per_second': 50}
-
+        env.close = lambda: None
         return MultiStepWrapper(env)
 
     @staticmethod
