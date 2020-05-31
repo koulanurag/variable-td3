@@ -38,7 +38,9 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
     q2 = model.critic_2(state_batch, action_batch)
 
     # Compute Targets Q values & Q Losses
-    q1_loss, q2_loss = torch.zeros(reward_batch.shape), torch.zeros(reward_batch.shape)
+    q1_loss = torch.zeros(reward_batch.shape).to(config.device)
+    q2_loss = torch.zeros(reward_batch.shape).to(config.device)
+
     for repeat_i in range(len(model.action_repeats)):
         valid_next_state_batch = next_state_batch[:, repeat_i][next_state_mask_batch[:, repeat_i]]
         valid_reward_batch = reward_batch[:, repeat_i][next_state_mask_batch[:, repeat_i]]
