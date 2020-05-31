@@ -7,7 +7,7 @@ from torch.distributions import Normal
 from torch.nn import MSELoss
 from torch.optim import Adam
 from torch.utils.tensorboard import SummaryWriter
-from core.utils import get_epsilon
+from core.utils import get_epsilon, clip_action
 from .config import BaseConfig
 from .replay_memory import ReplayMemory, BatchOutput
 from .test import test
@@ -54,7 +54,7 @@ def update_params(model, target_model, critic_optimizer, policy_optimizer, memor
                 noise = noise_dist.sample(next_action.shape).squeeze(-1).to(config.device)
                 noise = noise.clamp(-config.noise_clip, config.noise_clip)
                 next_action = next_action + noise
-                next_action = config.clip_action(next_action)
+                next_action = clip_action(next_action, config.action_space)
 
                 q1_next_target = target_model.critic_1(valid_next_state_batch, next_action)
                 q2_next_target = target_model.critic_2(valid_next_state_batch, next_action)
@@ -142,7 +142,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
                     action = model.actor(state)
                     noise = Normal(torch.tensor([0.0]), torch.tensor([config.exploration_noise]))
                     action = action + noise.sample(action.shape).squeeze(-1).to(config.device)
-                    action = config.clip_action(action)
+                    action = clip_action(action, config.action_space)
 
                     # epsilon-greedy repeat
                     if np.random.rand() <= epsilon:

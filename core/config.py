@@ -85,15 +85,6 @@ class BaseConfig(object):
         return TD3Network(self.observation_space.shape[0], self.action_space.shape[0], action_repeats,
                           hidden_dim=256, action_space=self.action_space)
 
-    def clip_action(self, action):
-        assert len(action.shape) == 2
-        clamped_action = [torch.clamp(action[:, a_i].unsqueeze(1),
-                                      self.action_space.low[a_i],
-                                      self.action_space.high[a_i])
-                          for a_i in range(action.shape[1])]
-        action = torch.cat(clamped_action, dim=1)
-        return action
-
     def get_hparams(self):
         hparams = {}
         for k, v in self.__dict__.items():
