@@ -99,7 +99,7 @@ if __name__ == '__main__':
 
             logging.getLogger('test').info('Test Score: {}'.format(test_score))
         else:
-            raise Exception('Please select a valid operation(--opr) to be performed')
+            raise NotImplementedError('"--opr {}" is not implemented ( or not valid)'.format(args.opr))
 
     except Exception as e:
         logging.getLogger('root').error(e, exc_info=True)

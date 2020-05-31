@@ -5,11 +5,11 @@
 |Slide| Overleaf|
 
 ## Installation
-1. For classic tasks and gym mujcoco , do following:
+1. For classic tasks and gym mujoco , do following:
     ```bash
     conda env create -f  env.yml # creates env(having mujoco 1.5) with name "vtd3"
     ```
-2. For dm_contro & cassie, create a separate conda env. having mujoco 2.0 :
+2. For dm_control & cassie, create a separate conda env. having mujoco 2.0 :
     ```bash
     conda env create -f env_mj2.yml # creates env with name "vtd3_mj2"
     ```
