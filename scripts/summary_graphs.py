@@ -45,7 +45,7 @@ def extract_summaries(logdir: str):
 
             event_path = os.path.join(root, event_files[0])
             acc = ea.EventAccumulator(event_path)
-            acc.Reload()
+            acc.Reload()  # load data
 
             if 'fixed' in root:
                 repeat_mode = 'fixed'
@@ -88,6 +88,7 @@ def _plot(scalars_info, save_dir, column_size=3):
     # make titles
     titles = sorted(list(scalars_info.keys()))
 
+    # overall plot attributes
     column_size = min(column_size, len(titles))
     rows = math.ceil(len(titles) / column_size)
     cols = column_size
@@ -191,3 +192,5 @@ if __name__ == '__main__':
     elif args.opr == 'plot':
         scalars_info = pickle.load(open(scalar_info_path, 'rb'))
         _plot(scalars_info, summary_dir)
+    else:
+        raise NotImplementedError('"--opr {}" is not implemented ( or not valid)'.format(args.opr))
