@@ -11,8 +11,9 @@ class CassieConfig(BaseConfig):
                                            start_step=int(25e3),
                                            lr=3e-4,
                                            replay_memory_capacity=int(1e6),
-                                           fixed_action_repeat=1,
-                                           test_interval_steps=5000)
+                                           fixed_action_repeat=10,
+                                           test_interval_steps=5000,
+                                           action_repeat_set=[10, 20, 50, 100, 200])
 
     def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
         env = self.env_factory(self.env_name)()
@@ -40,7 +41,7 @@ class CassieConfig(BaseConfig):
             from cassie import CassieEnv
 
             if path == 'Cassie-v0':
-                env_fn = partial(CassieEnv, clock_based=clock_based, state_est=state_est)
+                env_fn = partial(CassieEnv, simrate=1, clock_based=clock_based, state_est=state_est)
             else:
                 raise Exception("Cassie Env Unrecognized!")
             return env_fn
