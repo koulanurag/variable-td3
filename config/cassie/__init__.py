@@ -11,9 +11,6 @@ class CassieWrapper(MultiStepWrapper):
 
     def __init__(self, env):
         super(CassieWrapper, self).__init__(env)
-        self.action_space = Box(low=-1.0, high=1.0, shape=(10,), dtype=np.float32)
-        self.observation_space = Box(low=-1.0, high=1.0, shape=(42,), dtype=np.float32)
-        self.reward_range = None
 
         self._step_count = 0
         self._max_steps = 15000
@@ -46,7 +43,11 @@ class CassieConfig(BaseConfig):
 
     def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
         env = self.env_factory(self.env_name)()
+        env.action_space = Box(low=-1.0, high=1.0, shape=(10,), dtype=np.float32)
+        env.observation_space = Box(low=-1.0, high=1.0, shape=(42,), dtype=np.float32)
+        env.reward_range = None
 
+        env.close = lambda: None
         return CassieWrapper(env)
 
     @staticmethod
