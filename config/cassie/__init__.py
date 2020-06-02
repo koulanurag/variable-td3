@@ -6,8 +6,14 @@ from core.env_wrapper import MultiStepWrapper
 
 
 class CassieWrapper(MultiStepWrapper):
+    metadata = {'render.modes': ['human', 'rgb_array'],
+                'video.frames_per_second': 50}
+
     def __init__(self, env):
         super(CassieWrapper, self).__init__(env)
+        env.action_space = Box(low=-1.0, high=1.0, shape=(10,), dtype=np.float32)
+        env.observation_space = Box(low=-1.0, high=1.0, shape=(42,), dtype=np.float32)
+        env.reward_range = None
 
         self._step_count = 0
         self._max_steps = 15000
@@ -15,10 +21,17 @@ class CassieWrapper(MultiStepWrapper):
     def step(self, action, action_repeat_n=1):
         assert action_repeat_n >= 1, 'action repeat should be atleast 1'
         self._step_count += action_repeat_n
-        obs, reward, done, info = super().step(action, action_repeat_n)
+        obs, reward, done, info = self.env.step(action, repeat=action_repeat_n)
 
         done = done or (self._step_count >= self._max_steps)
         return obs, reward, done, info
+
+    def reset(self):
+        self._step_count = 0
+        return super(CassieWrapper, self).reset()
+
+    def close(self):
+        return None
 
 
 class CassieConfig(BaseConfig):
@@ -33,14 +46,8 @@ class CassieConfig(BaseConfig):
 
     def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
         env = self.env_factory(self.env_name)()
-        env.action_space = Box(low=-1.0, high=1.0, shape=(10,), dtype=np.float32)
-        env.observation_space = Box(low=-1.0, high=1.0, shape=(42,), dtype=np.float32)
-        env.reward_range = None
-        env.metadata = {'render.modes': ['human', 'rgb_array'],
-                        'video.frames_per_second': 50}
-        env.close = lambda: None
 
-        return MultiStepWrapper(env)
+        return CassieWrapper(env)
 
     @staticmethod
     def env_factory(path, state_est=False, clock_based=True, **kwargs):
