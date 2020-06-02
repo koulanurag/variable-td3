@@ -9,9 +9,16 @@ class CassieWrapper(MultiStepWrapper):
     def __init__(self, env):
         super(CassieWrapper, self).__init__(env)
 
+        self._step_count = 0
+        self._max_steps = 15000
+
     def step(self, action, action_repeat_n=1):
         assert action_repeat_n >= 1, 'action repeat should be atleast 1'
-        return super().step(action, action_repeat_n)
+        self._step_count += action_repeat_n
+        obs, reward, done, info = super().step(action, action_repeat_n)
+
+        done = done or (self._step_count >= self._max_steps)
+        return obs, reward, done, info
 
 
 class CassieConfig(BaseConfig):
