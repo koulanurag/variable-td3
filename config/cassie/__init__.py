@@ -11,9 +11,9 @@ class CassieWrapper(MultiStepWrapper):
 
     def __init__(self, env):
         super(CassieWrapper, self).__init__(env)
-        env.action_space = Box(low=-1.0, high=1.0, shape=(10,), dtype=np.float32)
-        env.observation_space = Box(low=-1.0, high=1.0, shape=(42,), dtype=np.float32)
-        env.reward_range = None
+        self.action_space = Box(low=-1.0, high=1.0, shape=(10,), dtype=np.float32)
+        self.observation_space = Box(low=-1.0, high=1.0, shape=(42,), dtype=np.float32)
+        self.reward_range = None
 
         self._step_count = 0
         self._max_steps = 15000
