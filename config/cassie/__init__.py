@@ -5,6 +5,15 @@ from core.config import BaseConfig
 from core.env_wrapper import MultiStepWrapper
 
 
+class CassieWrapper(MultiStepWrapper):
+    def __init__(self, env):
+        super(CassieWrapper, self).__init__(env)
+
+    def step(self, action, action_repeat_n=1):
+        assert action_repeat_n >= 1, 'action repeat should be atleast 1'
+        return super().step(action, action_repeat_n)
+
+
 class CassieConfig(BaseConfig):
     def __init__(self):
         super(CassieConfig, self).__init__(max_env_steps=int(1e6),
@@ -23,6 +32,7 @@ class CassieConfig(BaseConfig):
         env.metadata = {'render.modes': ['human', 'rgb_array'],
                         'video.frames_per_second': 50}
         env.close = lambda: None
+
         return MultiStepWrapper(env)
 
     @staticmethod
@@ -45,23 +55,8 @@ class CassieConfig(BaseConfig):
             else:
                 raise Exception("Cassie Env Unrecognized!")
             return env_fn
-
-        spec = gym.envs.registry.spec(path)
-        _kwargs = spec._kwargs.copy()
-        _kwargs.update(kwargs)
-
-        try:
-            if callable(spec._entry_point):
-                cls = spec._entry_point(**_kwargs)
-            else:
-                cls = gym.envs.registration.load(spec._entry_point)
-        except AttributeError:
-            if callable(spec.entry_point):
-                cls = spec.entry_point(**_kwargs)
-            else:
-                cls = gym.envs.registration.load(spec.entry_point)
-
-        return partial(cls, **_kwargs)
+        else:
+            raise NotImplementedError('{} Env is not implemented'.format(path))
 
 
 run_config = CassieConfig()
