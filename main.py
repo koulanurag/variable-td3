@@ -72,7 +72,7 @@ if __name__ == '__main__':
             if args.use_wandb:
                 import wandb
 
-                wandb.init(group=args.case + ':' + args.env, project="td3-variable",
+                wandb.init(group=args.case + ':' + args.env, project="variable-td3",
                            config=run_config.get_hparams(), sync_tensorboard=True)
 
             summary_writer = SummaryWriter(run_config.exp_path, flush_secs=60 * 1)  # flush every 1 minutes
