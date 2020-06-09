@@ -53,7 +53,7 @@ class BaseConfig(object):
         self.test_episodes = test_episodes
 
         # reward normalization
-        self.reward_scale_factor = None
+        self.reward_scale_factor = 1
 
         # exploration
         self.min_epsilon = min_epsilon
@@ -114,10 +114,8 @@ class BaseConfig(object):
 
         # action repeat mode
         if self.action_repeat_mode == 'fixed':
-            self.reward_scale_factor = self.fixed_action_repeat
             self.exp_path = os.path.join(self.exp_path, 'fixed', 'action_repeat_{}'.format(self.fixed_action_repeat))
         elif self.action_repeat_mode == 'variable':
-            self.reward_scale_factor = sum(self.action_repeat_set) / len(self.action_repeat_set)
             self.exp_path = os.path.join(self.exp_path, 'variable')
         else:
             raise AttributeError('action_repeat_mode : {} is not valid'.format(self.action_repeat_mode))

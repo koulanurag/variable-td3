@@ -16,3 +16,4 @@ dependencies:
       - opencv-python==4.2.0.34
       - tensorboard==2.2.1
       - wandb==0.8.35
+      - moviepy=1.0.3
