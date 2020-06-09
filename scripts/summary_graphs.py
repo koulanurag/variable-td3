@@ -11,13 +11,11 @@ import argparse
 import os
 import pickle
 import numpy as np
-import random
 from collections import defaultdict
 import math
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from scipy import signal
 from tensorboard.backend.event_processing import event_accumulator as ea
 
 TEST_TAG = {'ref': 'test/score'}

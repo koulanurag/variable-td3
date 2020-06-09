@@ -38,7 +38,7 @@ class CassieConfig(BaseConfig):
                                            test_interval_steps=5000,
                                            action_repeat_set=[10, 20, 50, 100, 200])
 
-    def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
+    def new_game(self, seed=None):
         env = self.env_factory(self.env_name)()
         env.action_space = Box(low=-1.0, high=1.0, shape=(10,), dtype=np.float32)
         env.observation_space = Box(low=-1.0, high=1.0, shape=(42,), dtype=np.float32)

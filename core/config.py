@@ -76,8 +76,9 @@ class BaseConfig(object):
         self.model_path = None
         self.best_model_path = None
         self.test_data_path = None
+        self.recording_path = None
 
-    def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
+    def new_game(self, seed=None):
         raise NotImplementedError
 
     def get_uniform_network(self):
@@ -128,3 +129,6 @@ class BaseConfig(object):
         self.model_path = os.path.join(self.exp_path, 'model.p')
         self.best_model_path = os.path.join(self.exp_path, 'best_model.p')
         self.test_data_path = os.path.join(self.exp_path, 'test_data.p')
+
+        self.recording_path = os.path.join(self.exp_path, 'recordings')
+        os.makedirs(self.recording_path, exist_ok=True)
