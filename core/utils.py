@@ -47,7 +47,7 @@ def init_logger(base_path):
         logger.setLevel(logging.DEBUG)
 
 
-def write_gif(episode_images, action_repeats, episode_rewards, gif_path):
+def write_gif(episode_images, action_repeats, episode_rewards, gif_path, save_mp4=True):
     assert len(episode_images) == len(episode_rewards)
 
     import plotly.graph_objects as go
@@ -83,7 +83,6 @@ def write_gif(episode_images, action_repeats, episode_rewards, gif_path):
 
         pop_i = 0
         while pop_i <= repeat and step_i < len(episode_images):
-
             # obs
             obs = Image.fromarray(episode_images[step_i])
 
@@ -110,3 +109,9 @@ def write_gif(episode_images, action_repeats, episode_rewards, gif_path):
 
     # save as gif
     episode_stats[0].save(gif_path, save_all=True, append_images=episode_stats[1:], optimize=False, loop=1)
+
+    # save video
+    if save_mp4:
+        import moviepy.editor as mp
+        clip = mp.VideoFileClip(gif_path)
+        clip.write_videofile(gif_path.replace('.gif', '.mp4'))
