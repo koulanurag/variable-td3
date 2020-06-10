@@ -7,6 +7,9 @@ from .env_wrapper import MultiStepWrapper
 from typing import NamedTuple
 from .utils import write_gif
 
+# Ref: https://github.com/openai/mujoco-py/issues/390
+from mujoco_py import GlfwContext
+GlfwContext(offscreen=True) 
 
 class TestOutput(NamedTuple):
     score: float
@@ -40,7 +43,6 @@ def _test(id: int, env: MultiStepWrapper, model: TD3Network, render: bool = Fals
             # step
             state, reward, done, info = env.step(action)
             episode_rewards.append(reward)
-
             if done:
                 break
 
