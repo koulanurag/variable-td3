@@ -90,6 +90,11 @@ if __name__ == '__main__':
             model = model.to('cpu')
             model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 
+            if args.render and args.case == 'mujoco':
+                # Ref: https://github.com/openai/mujoco-py/issues/390
+                from mujoco_py import GlfwContext
+                GlfwContext(offscreen=True)
+
             env = run_config.new_game()
             test_score, test_repeat_counts = test(env, model, args.test_episodes,
                                                   device='cpu', render=args.render,

@@ -71,8 +71,7 @@ def write_gif(episode_images, action_repeats, episode_rewards, gif_path, save_mp
     episode_stats = []
     total_reward = 0
     _obs = Image.fromarray(episode_images[0])
-
-    width, height = 0.75 * _obs.width, 0.75 * _obs.height
+    width, height = int(0.75 * _obs.width), int(0.75 * _obs.height)
     step_i = 0
 
     for repeat in action_repeats:
@@ -86,7 +85,7 @@ def write_gif(episode_images, action_repeats, episode_rewards, gif_path, save_mp
         while pop_i <= repeat and step_i < len(episode_images):
             # obs
             obs = Image.fromarray(episode_images[step_i])
-            obs = obs.resize((width,height),Image.ANTIALIAS)
+            obs = obs.resize((width, height), Image.ANTIALIAS)
             # update score figure.
             total_reward += episode_rewards[step_i]
             score_fig['data'][0]['x'] += tuple([step_i])

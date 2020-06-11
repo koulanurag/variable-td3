@@ -7,9 +7,6 @@ from .env_wrapper import MultiStepWrapper
 from typing import NamedTuple
 from .utils import write_gif
 
-# Ref: https://github.com/openai/mujoco-py/issues/390
-from mujoco_py import GlfwContext
-GlfwContext(offscreen=True) 
 
 class TestOutput(NamedTuple):
     score: float
