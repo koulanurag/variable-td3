@@ -5,11 +5,18 @@
 |Slide| Overleaf| Google Drive|
 
 ## Installation
-1. For classic tasks and gym mujoco , do following:
+1. Install [conda](https://docs.conda.io/en/latest/miniconda.html)
+2. For classic tasks, do following:
     ```bash
     conda env create -f  env.yml # creates env(having mujoco 1.5) with name "vtd3"
     ```
-2. For dm_control & cassie, create a separate conda env. having mujoco 2.0 :
+3. `Optional`: For gym mujoco env.(requires license) do following:
+
+    - Requires [mjpro 150 and mujoco license](https://www.roboti.us/index.html)
+    - ```conda activate vtd3 # activates conda-env. in (1)```
+    - ```pip install 'gym[mujoco]'```
+4. `Optional`: For dm_control & cassie, create a separate conda env. having mujoco 2.0 :
+    - Requires [mujoco200 and mujoco license](https://www.roboti.us/index.html)
     ```bash
     conda env create -f env_mj2.yml # creates env with name "vtd3_mj2"
     ```
