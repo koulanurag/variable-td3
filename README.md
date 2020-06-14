@@ -8,7 +8,7 @@
 1. Install [conda](https://docs.conda.io/en/latest/miniconda.html)
 2. For classic tasks, do following:
     ```bash
-    conda env create -f  env.yml # creates env(having mujoco 1.5) with name "vtd3"
+    conda env create -f  env.yml # creates env with name "vtd3"
     ```
 3. `Optional`: For gym mujoco env.(requires license) do following:
 
