@@ -17,9 +17,7 @@
     - ```pip install 'gym[mujoco]'```
 4. `Optional`: For dm_control & cassie, create a separate conda env. having mujoco 2.0 :
     - Requires [mujoco200 and mujoco license](https://www.roboti.us/index.html)
-    ```bash
-    conda env create -f env_mj2.yml # creates env with name "vtd3_mj2"
-    ```
+    - ```conda env create -f env_mj2.yml # creates env with name "vtd3_mj2"```
 
 ## Usage
 - ```$ conda activate <env_name>```
