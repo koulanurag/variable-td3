@@ -10,14 +10,16 @@
     ```bash
     conda env create -f  env.yml # creates env with name "vtd3"
     ```
-3. `Optional`: For gym mujoco env.(requires license) do following:
+3. `Optional`: For gym mujoco env. do following:
 
     - Requires [mjpro 150 and mujoco license](https://www.roboti.us/index.html)
-    - ```conda activate vtd3 # activates conda-env. in (1)```
+    - ```conda activate vtd3 # activates conda-env. in (2)```
     - ```pip install 'gym[mujoco]'```
 4. `Optional`: For dm_control & cassie, create a separate conda env. having mujoco 2.0 :
     - Requires [mujoco200 and mujoco license](https://www.roboti.us/index.html)
     - ```conda env create -f env_mj2.yml # creates env with name "vtd3_mj2"```
+
+_Having trouble during installation ?, please refer [here](#installation-troubleshooting)_
 
 ## Usage
 - ```$ conda activate <env_name>```
@@ -37,3 +39,12 @@
     $ python summary_graphs.py --logdir=../results/classic_control --opr extract_summary 
     $ python summary_graphs.py --logdir=../results/classic_control --opr plot
     ```
+
+## Installation Troubleshooting
+### Windows : 
+- 
+  - `Error`: ` error: command 'swig.exe' failed ...`  
+  - `Fix`: install swigy from [here](http://www.swig.org/download.html) and add it in your path using this [reference](https://www.youtube.com/watch?v=HDD9QqLtAws).
+- 
+  - `Error`: ` error: Microsoft Visual C++ 14.0 is required. ...`
+  - `Fix`: by installing build tools from [here.](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
