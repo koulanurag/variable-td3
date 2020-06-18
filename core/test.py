@@ -5,7 +5,7 @@ import torch
 from .model import TD3Network
 from .env_wrapper import MultiStepWrapper
 from typing import NamedTuple
-
+import time
 
 class TestOutput(NamedTuple):
     score: float
@@ -22,6 +22,7 @@ def _test(env: MultiStepWrapper, model: TD3Network, render: bool = False):
     while not done:
         if render:
             env.render()
+            time.sleep(0.1)
 
         # get action
         state = torch.FloatTensor(state).unsqueeze(0)
