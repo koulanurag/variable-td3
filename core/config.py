@@ -53,7 +53,7 @@ class BaseConfig(object):
         self.test_episodes = test_episodes
 
         # reward normalization
-        self.reward_scale_factor = None
+        self.reward_scale_factor = 1
 
         # exploration
         self.min_epsilon = min_epsilon
@@ -76,8 +76,9 @@ class BaseConfig(object):
         self.model_path = None
         self.best_model_path = None
         self.test_data_path = None
+        self.recording_path = None
 
-    def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
+    def new_game(self, seed=None):
         raise NotImplementedError
 
     def get_uniform_network(self):
@@ -113,10 +114,8 @@ class BaseConfig(object):
 
         # action repeat mode
         if self.action_repeat_mode == 'fixed':
-            self.reward_scale_factor = self.fixed_action_repeat
             self.exp_path = os.path.join(self.exp_path, 'fixed', 'action_repeat_{}'.format(self.fixed_action_repeat))
         elif self.action_repeat_mode == 'variable':
-            self.reward_scale_factor = sum(self.action_repeat_set) / len(self.action_repeat_set)
             self.exp_path = os.path.join(self.exp_path, 'variable')
         else:
             raise AttributeError('action_repeat_mode : {} is not valid'.format(self.action_repeat_mode))
@@ -128,3 +127,6 @@ class BaseConfig(object):
         self.model_path = os.path.join(self.exp_path, 'model.p')
         self.best_model_path = os.path.join(self.exp_path, 'best_model.p')
         self.test_data_path = os.path.join(self.exp_path, 'test_data.p')
+
+        self.recording_path = os.path.join(self.exp_path, 'recordings')
+        os.makedirs(self.recording_path, exist_ok=True)

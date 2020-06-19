@@ -45,3 +45,73 @@ def init_logger(base_path):
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         logger.setLevel(logging.DEBUG)
+
+
+def write_gif(episode_images, action_repeats, episode_rewards, gif_path, save_mp4=True):
+    assert len(episode_images) == len(episode_rewards)
+
+    import plotly.graph_objects as go
+    from io import BytesIO
+    from PIL import Image
+
+    rep_fig = go.Figure(data=go.Scatter(x=[], y=[]))
+    rep_fig.update_layout(
+        title="Action Repeat Count",
+        xaxis_title="Time Step",
+        yaxis_title="Action Repeat",
+    )
+
+    score_fig = go.Figure(data=go.Scatter(x=[], y=[]))
+    score_fig.update_layout(
+        title="Episode Score",
+        xaxis_title="Time Step",
+        yaxis_title="Score",
+    )
+
+    episode_stats = []
+    total_reward = 0
+    _obs = Image.fromarray(episode_images[0])
+    width, height = int(0.75 * _obs.width), int(0.75 * _obs.height)
+    step_i = 0
+
+    for repeat in action_repeats:
+        # update repeat count figure
+        rep_fig['data'][0]['x'] += tuple([step_i])
+        rep_fig['data'][0]['y'] += tuple([repeat])
+        repeat_img = Image.open(BytesIO(rep_fig.to_image(format="png",
+                                                         width=width, height=height)))
+
+        pop_i = 0
+        while pop_i <= repeat and step_i < len(episode_images):
+            # obs
+            obs = Image.fromarray(episode_images[step_i])
+            obs = obs.resize((width, height), Image.ANTIALIAS)
+            # update score figure.
+            total_reward += episode_rewards[step_i]
+            score_fig['data'][0]['x'] += tuple([step_i])
+            score_fig['data'][0]['y'] += tuple([total_reward])
+            score_img = Image.open(BytesIO(score_fig.to_image(format="png",
+                                                              width=width, height=height)))
+
+            # combine repeat image + actual obs + score image
+            overall_img = Image.new('RGB', (repeat_img.width + obs.width + score_img.width, repeat_img.height))
+            overall_img.paste(obs, (0, 0))
+            overall_img.paste(repeat_img, (obs.width, 0))
+            overall_img.paste(score_img, (obs.width + repeat_img.width, 0))
+            episode_stats.append(overall_img)
+
+            # incr counters
+            step_i += 1
+            pop_i += 1
+
+    assert total_reward == sum(episode_rewards)
+    assert step_i == len(episode_images)
+
+    # save as gif
+    episode_stats[0].save(gif_path, save_all=True, append_images=episode_stats[1:], optimize=False, loop=1)
+
+    # save video
+    if save_mp4:
+        import moviepy.editor as mp
+        clip = mp.VideoFileClip(gif_path)
+        clip.write_videofile(gif_path.replace('.gif', '.mp4'))

@@ -72,7 +72,7 @@ if __name__ == '__main__':
             if args.use_wandb:
                 import wandb
 
-                wandb.init(group=args.case + ':' + args.env, project="td3-variable",
+                wandb.init(group=args.case + ':' + args.env, project="variable-td3",
                            config=run_config.get_hparams(), sync_tensorboard=True)
 
             summary_writer = SummaryWriter(run_config.exp_path, flush_secs=60 * 1)  # flush every 1 minutes
@@ -90,11 +90,16 @@ if __name__ == '__main__':
             model = model.to('cpu')
             model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 
-            env = run_config.new_game(save_video=True,
-                                      video_dir_path=os.path.join(run_config.exp_path, 'recordings'))
+            if args.render and args.case == 'mujoco':
+                # Ref: https://github.com/openai/mujoco-py/issues/390
+                from mujoco_py import GlfwContext
+                GlfwContext(offscreen=True)
+
+            env = run_config.new_game()
             test_score, test_repeat_counts = test(env, model, args.test_episodes,
                                                   device='cpu', render=args.render,
-                                                  save_test_data=True, save_path=run_config.test_data_path)
+                                                  save_test_data=True, save_path=run_config.test_data_path,
+                                                  recording_path=run_config.recording_path)
             env.close()
 
             logging.getLogger('test').info('Test Score: {}'.format(test_score))

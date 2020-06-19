@@ -11,13 +11,11 @@ import argparse
 import os
 import pickle
 import numpy as np
-import random
 from collections import defaultdict
 import math
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from scipy import signal
 from tensorboard.backend.event_processing import event_accumulator as ea
 
 TEST_TAG = {'ref': 'test/score'}
@@ -92,8 +90,10 @@ def _plot(scalars_info, save_dir, column_size=3):
     column_size = min(column_size, len(titles))
     rows = math.ceil(len(titles) / column_size)
     cols = column_size
-    test_fig = make_subplots(rows, cols, subplot_titles=titles, )
-    action_repeat_fig = make_subplots(rows, cols, subplot_titles=titles)
+    test_fig = make_subplots(rows, cols, subplot_titles=titles, horizontal_spacing=0.05,
+                             vertical_spacing=0.05, print_grid=True)
+    action_repeat_fig = make_subplots(rows, cols, subplot_titles=titles, horizontal_spacing=0.05,
+                                      vertical_spacing=0.05, print_grid=True)
 
     mode_colors = {}
 

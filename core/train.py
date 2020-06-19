@@ -126,7 +126,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
     # Fire!!
     for i_episode in itertools.count(1):
         done = False
-        episode_steps, episode_reward, epsiode_repeats = 0, 0, []
+        episode_steps, episode_reward, episode_repeats = 0, 0, []
 
         state = env.reset()
         while not done:
@@ -154,7 +154,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
                 state = state.data.cpu().numpy()[0]
                 action = action.data.cpu().numpy()[0]
                 repeat_n = model.action_repeats[repeat_idx]
-            epsiode_repeats.append(repeat_n)
+            episode_repeats.append(repeat_n)
 
             # step
             step = 0
@@ -233,7 +233,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
         # log episode data
         writer.add_scalar('data/eps_reward', episode_reward, total_env_steps)
         writer.add_scalar('data/eps_steps', episode_steps, total_env_steps)
-        writer.add_scalar('data/eps_repeats', np.array(epsiode_repeats).mean(), total_env_steps)
+        writer.add_scalar('data/eps_repeats', np.array(episode_repeats).mean(), total_env_steps)
         writer.add_scalar('data/episodes', i_episode, total_env_steps)
         writer.add_scalar('data/epsilon', epsilon, total_env_steps)
         writer.add_scalar('train/updates', updates, total_env_steps)
