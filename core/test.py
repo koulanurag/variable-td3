@@ -13,7 +13,7 @@ class TestOutput(NamedTuple):
     avg_repeat: float
 
 
-def _test(id: int, env: MultiStepWrapper, model: TD3Network, render: bool = False, recording_path=None):
+def _test(id: int, env: MultiStepWrapper, model: TD3Network, render: bool = False, recording_path=None,save_video=False):
     episode_rewards = []
     action_repeats = []
 
@@ -34,8 +34,11 @@ def _test(id: int, env: MultiStepWrapper, model: TD3Network, render: bool = Fals
 
         for _ in range(repeat):
             if render:
-                img = env.render(mode='rgb_array')
-                episode_images.append(img)
+                if save_video:
+                    img = env.render(mode='rgb_array')
+                    episode_images.append(img)
+                else:
+                    env.render(mode='human')
 
             # step
             state, reward, done, info = env.step(action)
@@ -43,7 +46,7 @@ def _test(id: int, env: MultiStepWrapper, model: TD3Network, render: bool = Fals
             if done:
                 break
 
-    if render:
+    if render and save_video:
         write_gif(episode_images, action_repeats, episode_rewards,
                   os.path.join(recording_path, 'ep_{}.gif'.format(id)))
 

@@ -83,7 +83,7 @@ if __name__ == '__main__':
             if args.use_wandb:
                 wandb.join()
         elif args.opr == 'test':
-            model_path = run_config.model_path
+            model_path = run_config.best_model_path
             assert model_path, 'model not found: {}'.format(model_path)
 
             model = run_config.get_uniform_network()
