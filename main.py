@@ -36,6 +36,8 @@ if __name__ == '__main__':
                         help='Action Repeat (default: %(default)s)')
     parser.add_argument('--test_episodes', type=int, default=1,
                         help='Evaluation episode count (default: %(default)s)')
+    parser.add_argument('--wandb_dir', default=os.path.join(os.getcwd(), 'wandb'),
+                        help="Directory Path to store results (default: %(default)s)")
 
     # Process arguments
     args = parser.parse_args()
@@ -72,7 +74,7 @@ if __name__ == '__main__':
             if args.use_wandb:
                 import wandb
 
-                wandb.init(group=args.case + ':' + args.env, project="variable-td3",
+                wandb.init(dir=args.wandb_dir,group=args.case + ':' + args.env, project="variable-td3",
                            config=run_config.get_hparams(), sync_tensorboard=True)
 
             summary_writer = SummaryWriter(run_config.exp_path, flush_secs=60 * 1)  # flush every 1 minutes
