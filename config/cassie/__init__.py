@@ -19,4 +19,5 @@ class CassieConfig(BaseConfig):
         env.close = lambda: None
         return MultiStepWrapper(env)
 
+
 run_config = CassieConfig()

@@ -96,6 +96,7 @@ class BaseConfig(object):
     def set_config(self, args):
         # env info
         self.env_name = args.env
+        self.case = args.case
         env = self.new_game()
         self.observation_space = env.observation_space
         self.action_space = env.action_space

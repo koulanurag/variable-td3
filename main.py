@@ -72,10 +72,12 @@ if __name__ == '__main__':
     try:
         if args.opr == 'train':
             if args.use_wandb:
+                os.makedirs(args.wandb_dir, exist_ok=True)
+                os.environ['WANDB_DIR'] = str(args.wandb_dir)
                 import wandb
 
-                wandb.init(dir=args.wandb_dir,group=args.case + ':' + args.env, project="variable-td3",
-                           config=run_config.get_hparams(), sync_tensorboard=True)
+                wandb.init(job_type='train', dir=args.wandb_dir, group=args.case + ':' + args.env,
+                           project="variable-td3", config=run_config.get_hparams(), sync_tensorboard=True)
 
             summary_writer = SummaryWriter(run_config.exp_path, flush_secs=60 * 1)  # flush every 1 minutes
             train(run_config, summary_writer)
@@ -95,6 +97,7 @@ if __name__ == '__main__':
             if args.render and args.case == 'mujoco':
                 # Ref: https://github.com/openai/mujoco-py/issues/390
                 from mujoco_py import GlfwContext
+
                 GlfwContext(offscreen=True)
 
             env = run_config.new_game()
