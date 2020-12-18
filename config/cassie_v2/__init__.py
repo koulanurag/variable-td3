@@ -13,7 +13,7 @@ class CassieConfigV2(BaseConfig):
                                              test_interval_steps=5000)
 
     def new_game(self, seed=None, save_video=False, video_dir_path=None, uid=None):
-        from cassie import CassieEnv_v2
+        from .cassie import CassieEnv_v2
         env = CassieEnv_v2()
         env.reward_range = None
         env.close = lambda: None
