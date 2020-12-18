@@ -17,6 +17,8 @@ class CassieConfigV2(BaseConfig):
         env = CassieEnv_v2()
         env.reward_range = None
         env.close = lambda: None
+        env.action_space.low = -1 * np.ones(env.action_space.low.shape)
+        env.action_space.high = np.ones(env.action_space.high.shape)
         return MultiStepWrapper(env)
 
 
