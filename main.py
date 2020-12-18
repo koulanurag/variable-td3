@@ -18,7 +18,8 @@ if __name__ == '__main__':
                         help='Name of the environment')
     parser.add_argument('--result_dir', default=os.path.join(os.getcwd(), 'results'),
                         help="Directory Path to store results (default: %(default)s)")
-    parser.add_argument('--case', required=True, choices=['dm_control', 'mujoco', 'box2d', 'classic_control', 'cassie'],
+    parser.add_argument('--case', required=True, choices=['dm_control', 'mujoco', 'box2d', 'classic_control', 'cassie',
+                                                          'cassie-v2'],
                         help="It's used for switching between different domains(default: %(default)s)")
     parser.add_argument('--opr', required=True, choices=['train', 'test'])
     parser.add_argument('--no_cuda', action='store_true', default=False,
@@ -58,6 +59,8 @@ if __name__ == '__main__':
         from config.dm_control import run_config
     elif args.case == 'cassie':
         from config.cassie import run_config
+    elif args.case == 'cassie-v2':
+        from config.cassie_v2 import run_config
     else:
         raise Exception('Invalid --case option.')
 
