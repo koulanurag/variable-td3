@@ -1,7 +1,7 @@
 import gym
 from core.config import BaseConfig
 from core.env_wrapper import MultiStepWrapper
-
+import numpy as np
 
 class CassieConfigV2(BaseConfig):
     def __init__(self):
