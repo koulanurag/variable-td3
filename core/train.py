@@ -245,7 +245,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
         # save model
         if i_episode % config.save_model_freq == 0:
             torch.save(model.state_dict(), config.model_path)
-            if config.args.use_wandb:
+            if config.use_wandb:
                 import wandb
                 wandb.save(config.model_path, policy='now')
 

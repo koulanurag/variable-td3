@@ -97,6 +97,7 @@ class BaseConfig(object):
         # env info
         self.env_name = args.env
         self.case = args.case
+        self.use_wandb = args.use_wandb
         env = self.new_game()
         self.observation_space = env.observation_space
         self.action_space = env.action_space
