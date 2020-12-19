@@ -18,8 +18,8 @@ class CassieConfigV2(BaseConfig):
         env.reward_range = None
         env.close = lambda: None
         from gym import spaces
-        env.action_space = Box(low=-3 * np.ones(env.action_space.low.shape),
-                               high=3 * np.ones(env.action_space.high.shape),
+        env.action_space = Box(low=-3 * np.ones(env.action_space.shape),
+                               high=3 * np.ones(env.action_space.shape),
                                dtype=np.float32)
         return MultiStepWrapper(env)
 
