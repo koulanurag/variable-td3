@@ -18,6 +18,7 @@ class CassieConfigV2(BaseConfig):
         env = CassieEnv_v2()
         env.reward_range = None
         env.close = lambda: None
+        env.metadata = {}
         from gym import spaces
         env.action_space = spaces.Box(low=-3 * np.ones(env.action_space.shape),
                                       high=3 * np.ones(env.action_space.shape),
