@@ -3,6 +3,7 @@ from core.config import BaseConfig
 from core.env_wrapper import MultiStepWrapper
 import numpy as np
 
+
 class CassieConfigV2(BaseConfig):
     def __init__(self):
         super(CassieConfigV2, self).__init__(max_env_steps=int(1e6),
