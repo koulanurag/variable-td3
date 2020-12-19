@@ -18,9 +18,10 @@ class CassieConfig(BaseConfig):
         env = gym.make(self.env_name)
         env.reward_range = None
         env.close = lambda: None
-        env.action_space = Box(low=-3 * np.ones(env.action_space.low.shape),
-                               high=3 * np.ones(env.action_space.high.shape),
-                               dtype=np.float32)
+        from gym import spaces
+        env.action_space = spaces.Box(low=-3 * np.ones(env.action_space.low.shape),
+                                      high=3 * np.ones(env.action_space.high.shape),
+                                      dtype=np.float32)
         return MultiStepWrapper(env)
 
 
