@@ -11,6 +11,7 @@ from core.utils import get_epsilon, clip_action
 from .config import BaseConfig
 from .replay_memory import ReplayMemory, BatchOutput
 from .test import test
+import subprocess
 
 train_logger = logging.getLogger('train')
 test_logger = logging.getLogger('train_eval')
@@ -248,6 +249,7 @@ def train(config: BaseConfig, writer: SummaryWriter):
             if config.use_wandb:
                 import wandb
                 wandb.save(config.model_path, policy='now')
+                subprocess.Popen("wandb gc ")
 
         # check if max. env steps reached.
         if total_env_steps > config.max_env_steps:
