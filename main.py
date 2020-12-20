@@ -39,6 +39,10 @@ if __name__ == '__main__':
                         help='Evaluation episode count (default: %(default)s)')
     parser.add_argument('--wandb_dir', default=os.path.join(os.getcwd(), 'wandb'),
                         help="Directory Path to store results (default: %(default)s)")
+    parser.add_argument('--restore-model-from-wandb', action='store_true', default=False,
+                        help='restore model from wandb run. (default: %(default)s)')
+    parser.add_argument('--wandb-run-id', type=str,
+                        help='Wandb run if for restoring model (default: %(default)s)')
 
     # Process arguments
     args = parser.parse_args()
@@ -90,9 +94,16 @@ if __name__ == '__main__':
             if args.use_wandb:
                 wandb.join()
         elif args.opr == 'test':
-            model_path = run_config.best_model_path
-            assert model_path, 'model not found: {}'.format(model_path)
+            # restore from wandb
+            model_path = run_config.model_path
+            if args.restore_model_from_wandb:
+                assert args.wandb_run_id is not None, 'wandb run id cannot be {}'.format(args.wandb_run_id)
+                import wandb
 
+                root, name = os.path.split(model_path)
+                wandb.restore(name=name, run_path=args.wandb_run_id, replace=True, root=root)
+
+            assert model_path, 'model not found: {}'.format(model_path)
             model = run_config.get_uniform_network()
             model = model.to('cpu')
             model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
