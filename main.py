@@ -71,6 +71,8 @@ if __name__ == '__main__':
     # set config as per arguments
     run_config.set_config(args)
     log_base_path = make_results_dir(run_config.exp_path, args)
+    if args.use_wandb:
+        os.makedirs(args.wandb_dir, exist_ok=True)
 
     # set-up logger
     init_logger(log_base_path)

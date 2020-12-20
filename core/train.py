@@ -249,7 +249,15 @@ def train(config: BaseConfig, writer: SummaryWriter):
             if config.use_wandb:
                 import wandb
                 wandb.save(config.model_path, policy='now')
-                subprocess.Popen("wandb gc ")
+
+                # clean-up at regular intervals
+                import os
+                for env_var in ['WANDB_CONFIG_DIR', 'WANDB_CACHE_DIR', 'WANDB_DIR']:
+                    _path = os.environ[env_var]
+                    stream = os.popen('wandb  sync --clean --clean-old-hours 1 --clean-force {}'.format(_path))
+                    output = stream.read()
+                    print('Doing clean up for {}'.format(env_var))
+                    print(output)
 
         # check if max. env steps reached.
         if total_env_steps > config.max_env_steps:
