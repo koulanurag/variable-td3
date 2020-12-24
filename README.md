@@ -12,6 +12,7 @@ In this work, we learn a policy that learns an action as well as the time-step f
 
 
 `Status:`
+- Work has been halted.
 - Code provided as it is and no major updates expected.
 - This work is similar to the paper ["Learning to repeat: fine grained action repetition for deep reinforcement learning"](https://arxiv.org/pdf/1702.06054v1.pdf)
 
