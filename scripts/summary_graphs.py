@@ -3,8 +3,8 @@ Usage:
 Step 1: python summary_graphs.py --logdir=../results/classic_control --opr extract_summary
 Step 2: python summary_graphs.py --logdir=../results/classic_control --opr plot
 
-Why 2-step process? : Sometimes , you may want to re-do the plotting with some changes for more beautification
-as the first step takes a while.
+Why 2-step process? : Sometimes , you may want to re-do the plotting with some changes for more beautification.
+In those cases, we can avoid doing the first step as it usually takes much more time.
 """
 
 import argparse
@@ -193,4 +193,4 @@ if __name__ == '__main__':
         scalars_info = pickle.load(open(scalar_info_path, 'rb'))
         _plot(scalars_info, summary_dir)
     else:
-        raise NotImplementedError('"--opr {}" is not implemented ( or not valid)'.format(args.opr))
+        raise ValueError('"--opr {}" is not implemented ( or not valid)'.format(args.opr))

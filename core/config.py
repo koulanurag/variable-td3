@@ -1,8 +1,6 @@
 import os
 from typing import List
 
-import torch
-
 from core.model import TD3Network
 
 
@@ -27,9 +25,9 @@ class BaseConfig(object):
                  save_model_freq: int = 50,
                  replay_memory_capacity: int = 1e6,
                  action_repeat_set: List[int] = [2, 4, 8, 16, 32],
-                 fixed_action_repeat=2,
-                 test_interval_steps=5000,
-                 test_episodes=5):
+                 fixed_action_repeat: int = 2,
+                 test_interval_steps: int = 5000,
+                 test_episodes: int = 5):
 
         # training
         self.max_env_steps = max_env_steps
@@ -67,6 +65,7 @@ class BaseConfig(object):
         self.fixed_action_repeat = fixed_action_repeat
 
         # env info
+        self.case = None
         self.env_name = None
         self.observation_space = None
         self.action_space = None
@@ -77,6 +76,7 @@ class BaseConfig(object):
         self.best_model_path = None
         self.test_data_path = None
         self.recording_path = None
+        self.use_wandb = None
 
     def new_game(self, seed=None):
         raise NotImplementedError
@@ -94,6 +94,7 @@ class BaseConfig(object):
         return hparams
 
     def set_config(self, args):
+
         # env info
         self.env_name = args.env
         self.case = args.case
@@ -109,6 +110,8 @@ class BaseConfig(object):
         self.device = args.device
 
         if args.fixed_action_repeat is not None:
+            assert args.fixed_action_repeat >= 1, 'action repeat should be atleast 1, ' \
+                                                  'whereas found to be {} '.format(args.fixed_action_repeat)
             self.fixed_action_repeat = args.fixed_action_repeat
 
         # create experiment path

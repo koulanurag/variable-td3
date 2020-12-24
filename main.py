@@ -18,8 +18,7 @@ if __name__ == '__main__':
                         help='Name of the environment')
     parser.add_argument('--result_dir', default=os.path.join(os.getcwd(), 'results'),
                         help="Directory Path to store results (default: %(default)s)")
-    parser.add_argument('--case', required=True, choices=['dm_control', 'mujoco', 'box2d', 'classic_control', 'cassie',
-                                                          'cassie-v2'],
+    parser.add_argument('--case', required=True, choices=['dm_control', 'mujoco', 'box2d', 'classic_control'],
                         help="It's used for switching between different domains(default: %(default)s)")
     parser.add_argument('--opr', required=True, choices=['train', 'test'])
     parser.add_argument('--no_cuda', action='store_true', default=False,
@@ -32,7 +31,9 @@ if __name__ == '__main__':
     parser.add_argument('--use_wandb', action='store_true', default=False,
                         help='Use Weight and bias visualization lib (default: %(default)s)')
     parser.add_argument('--action_repeat_mode', choices=['fixed', 'variable'], default='variable',
-                        help='Mode of action repeat (default: %(default)s)')
+                        help='Mode of action repeat (default: %(default)s).  '
+                             'In the fixed mode, an action is simply repeated for fixed number of time-steps'
+                             ' whereas in the "variable" mode, we learn the repeat-count')
     parser.add_argument('--fixed_action_repeat', type=int, default=None,
                         help='Action Repeat (default: %(default)s)')
     parser.add_argument('--test_episodes', type=int, default=1,
@@ -51,6 +52,8 @@ if __name__ == '__main__':
     # seeding random iterators
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
+    if args.device == 'cuda':
+        torch.cuda.manual_seed(args.seed)
 
     # import corresponding configuration , neural networks and envs
     if args.case == 'classic_control':
@@ -61,10 +64,6 @@ if __name__ == '__main__':
         from config.mujoco import run_config
     elif args.case == 'dm_control':
         from config.dm_control import run_config
-    elif args.case == 'cassie':
-        from config.cassie import run_config
-    elif args.case == 'cassie-v2':
-        from config.cassie_v2 import run_config
     else:
         raise Exception('Invalid --case option.')
 
@@ -96,6 +95,7 @@ if __name__ == '__main__':
             if args.use_wandb:
                 wandb.join()
         elif args.opr == 'test':
+
             # restore from wandb
             model_path = run_config.model_path
             if args.restore_model_from_wandb:
@@ -105,6 +105,7 @@ if __name__ == '__main__':
                 root, name = os.path.split(model_path)
                 wandb.restore(name=name, run_path=args.wandb_run_id, replace=True, root=root)
 
+            # load model
             assert model_path, 'model not found: {}'.format(model_path)
             model = run_config.get_uniform_network()
             model = model.to('cpu')
@@ -125,7 +126,7 @@ if __name__ == '__main__':
 
             logging.getLogger('test').info('Test Score: {}'.format(test_score))
         else:
-            raise NotImplementedError('"--opr {}" is not implemented ( or not valid)'.format(args.opr))
+            raise ValueError('"--opr {}" is not implemented ( or not valid)'.format(args.opr))
 
     except Exception as e:
         logging.getLogger('root').error(e, exc_info=True)

@@ -3,9 +3,9 @@ import os
 import numpy as np
 import torch
 from .model import TD3Network
-from .env_wrapper import MultiStepWrapper
 from typing import NamedTuple
 from .utils import write_gif
+import gym
 
 
 class TestOutput(NamedTuple):
@@ -13,7 +13,8 @@ class TestOutput(NamedTuple):
     avg_repeat: float
 
 
-def _test(id: int, env: MultiStepWrapper, model: TD3Network, render: bool = False, recording_path=None,save_video=False):
+def _test(id: int, env: gym.Wrapper, model: TD3Network, render: bool = False, recording_path=None,
+          save_video=False):
     episode_rewards = []
     action_repeats = []
 
@@ -53,7 +54,7 @@ def _test(id: int, env: MultiStepWrapper, model: TD3Network, render: bool = Fals
     return sum(episode_rewards), action_repeats
 
 
-def test(env: MultiStepWrapper, model: TD3Network, episodes: int, device='cpu',
+def test(env: gym.Wrapper, model: TD3Network, episodes: int, device='cpu',
          render: bool = False, save_test_data: bool = False, save_path=None, recording_path=None):
     model.to(device)
     model.eval()

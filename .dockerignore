@@ -1,4 +1,4 @@
-.cache
-results/
-wandb/
+.cache/*
+results/*
+wandb/*
 

@@ -1,8 +1,20 @@
 # variable-td3
 
-|<a target="_blank" href="https://docs.google.com/presentation/d/1TKRy9va3qgIlia7pjdZkcLV9ht9bjQkUUcND4byrARg/edit?usp=sharing"><img src="https://lh3.ggpht.com/9rwhkrvgiLhXVBeKtScn1jlenYk-4k3Wyqt1PsbUr9jhGew0Gt1w9xbwO4oePPd5yOM=w300" width="65px" height="65px"/></a> | <a target="_blank" href="https://www.overleaf.com/project/5eccded67908040001d77a7e"><img src="https://images.ctfassets.net/nrgyaltdicpt/6qSXAo1CYEeBn5RkKLOR64/19c74bfb9a32772e353ff25c6f0070f5/ologo_square_colour_light_bg.png" width="70px" height="70px"/></a>| <a target="_blank" href="https://drive.google.com/drive/folders/135kdBROapppjGWIXl2cQLRJYu_trHi0k?usp=sharing"><img src="https://services.google.com/fh/files/misc/logo_drive_color_2x_web_96dp.png" width="70px" height="70px"/></a>| 
-|:-------------:|:-------------:|:---------:|
-|Slide| Overleaf| Google Drive|
+Traditionally, we learn a policy, and action is determined for every time-step. However, in many cases, it is also viable to simply repeat an action for multiple time-steps rather than determining a new action every time.  This repeat factor is usually manually tuned and is kept constant. We hypothesize that keeping it constant may not be an ideal-policy as there could be scenarios in an environment where we need fine-step control as well as there could be scenarios where a larger-step control is feasible. 
+For example, if we think of Lunar-Lander, we may need fine-step control as we are closer to the ground and attempting to land as compared to moments when we are high up in the space and large-repeat action may be feasible.
+
+In this work, we learn a policy that learns an action as well as the time-step for which this action should be repeated. This gives the policy the ability to have large as well as fine-step control. We also hypothesize that learning to repeat an action may also lead to better sample efficiency.  
+
+
+|<a target="_blank" href="https://docs.google.com/presentation/d/1TKRy9va3qgIlia7pjdZkcLV9ht9bjQkUUcND4byrARg/edit?usp=sharing"><img src="https://lh3.ggpht.com/9rwhkrvgiLhXVBeKtScn1jlenYk-4k3Wyqt1PsbUr9jhGew0Gt1w9xbwO4oePPd5yOM=w300" width="65px" height="65px"/></a> |
+|:-------------:|
+|Slide|
+
+
+`Status:`
+- Code provided as it is and no major updates expected.
+- This work is similar to the paper ["Learning to repeat: fine grained action repetition for deep reinforcement learning"](https://arxiv.org/pdf/1702.06054v1.pdf)
+
 
 ## Installation
 1. Install [conda](https://docs.conda.io/en/latest/miniconda.html)
@@ -15,7 +27,7 @@
     - Requires [mjpro 150 and mujoco license](https://www.roboti.us/index.html)
     - ```conda activate vtd3 # activates conda-env. in (2)```
     - ```pip install 'gym[mujoco]'```
-4. `Optional`: For dm_control & cassie, create a separate conda env. having mujoco 2.0 :
+4. `Optional`: For dm_control, create a separate conda env. having mujoco 2.0 :
     - Requires [mujoco200 and mujoco license](https://www.roboti.us/index.html)
     - ```conda env create -f env_mj2.yml # creates env with name "vtd3_mj2"```
 
@@ -28,8 +40,8 @@ _Having trouble during installation ?, please refer [here](#installation-trouble
 
     |Required Arguments | Description|  
     |:-------------|:-------------|  
-    | `--case {classic_control,box2d,mujoco,dm_control,cassie}` |It's used for switching between different domains(and configs)|  
-    | `--env` |Name of the environment <br><br> Environments corresponding to ease case: <br> `classic_control` : {Pendulum-v0, MountainCarContinuous-v0} <br> `box2d` : _{LunarLanderContinuous-v2, BipedalWalker-v3, BipedalWalkerHardcore-v3}_ <br>`mujoco`: _[(refer here)](https://gym.openai.com/envs/#mujoco)_ <br> `dm_control`: _[(refer here)](https://github.com/zuoxingdong/dm2gym)_ <br> `cassie`: {Cassie-v0} |  
+    | `--case {classic_control,box2d,mujoco,dm_control}` |It's used for switching between different domains(and configs)|  
+    | `--env` |Name of the environment <br><br> Environments corresponding to ease case: <br> `classic_control` : {Pendulum-v0, MountainCarContinuous-v0} <br> `box2d` : _{LunarLanderContinuous-v2, BipedalWalker-v3, BipedalWalkerHardcore-v3}_ <br>`mujoco`: _[(refer here)](https://gym.openai.com/envs/#mujoco)_ <br> `dm_control`: _[(refer here)](https://github.com/zuoxingdong/dm2gym)_ |  
     | `--opr {train,test}` |select the operation to be performed|
 
 - Visualize Results: ```tensorboard --logdir=./results```

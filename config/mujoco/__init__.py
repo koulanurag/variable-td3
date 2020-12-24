@@ -1,7 +1,6 @@
 import gym
 
 from core.config import BaseConfig
-from core.env_wrapper import MultiStepWrapper
 
 
 class MujocoConfig(BaseConfig):
@@ -17,8 +16,7 @@ class MujocoConfig(BaseConfig):
         env = gym.make(self.env_name)
         if seed is not None:
             env.seed(seed)
-
-        return MultiStepWrapper(env)
+        return env
 
 
 run_config = MujocoConfig()

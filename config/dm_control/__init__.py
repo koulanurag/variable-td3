@@ -1,7 +1,6 @@
 import gym
 
 from core.config import BaseConfig
-from core.env_wrapper import MultiStepWrapper
 
 
 class DMControlWrapper(gym.Wrapper):
@@ -36,8 +35,7 @@ class DmControlConfig(BaseConfig):
 
         if seed is not None:
             env.seed(seed)
-
-        return MultiStepWrapper(env)
+        return env
 
 
 run_config = DmControlConfig()
